@@ -54,8 +54,21 @@ function makeLiveAPI(tree, log, posts) {
     }
     return node || null;
   }
-  return class LiveAPI {
-    constructor(a, b) { this._path = ''; this.node = null; const p = typeof a === 'function' ? b : a; if (p !== undefined) this.path = p; }
+  const observers = [];
+  const LiveAPI = class LiveAPI {
+    constructor(a, b) {
+      LiveAPI.created += 1;
+      this._path = ''; this.node = null; this._property = null;
+      this.callback = typeof a === 'function' ? a : null;
+      const p = typeof a === 'function' ? b : a;
+      if (p !== undefined) this.path = p;
+    }
+    // Observing: like Max, setting `property` calls the callback at once with the current
+    // value, then again on every change (a test fires those with LiveAPI.notify(prop)).
+    get property() { return this._property; }
+    set property(prop) { this._property = prop; observers.push(this); if (this.callback) this.callback([prop].concat(this.get(prop))); }
+    static notify(prop) { for (const o of observers) if (o._property === prop && o.callback) o.callback([prop].concat(o.get(prop))); }
+    static get observers() { return observers; }
     get path() { return this._path; }
     set path(p) { this._path = String(p); this.node = resolve(p); }
     get id() { return this.node ? this.node.id : 0; }
@@ -74,6 +87,8 @@ function makeLiveAPI(tree, log, posts) {
     getcount(kid) { const k = this.node && this.node.children && this.node.children[kid]; return Array.isArray(k) ? k.length : 0; }
     call(method, ...args) { log.push({ path: this._path, call: method, args }); return null; }
   };
+  LiveAPI.created = 0;
+  return LiveAPI;
 }
 
 function load(device, script, opts = {}) {
