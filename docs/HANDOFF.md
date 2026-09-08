@@ -73,6 +73,14 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   saved at some point during the tests with the marker value in it; a display dial only,
   reset to 0.
 
+- **Transpose Q, Phase 1 script, on the live set.** Installed in development form, driven
+  over MCP with the Main muted: Pending 2, transport running, and on the next downbeat
+  `Current` read 2 and every one of the nine `[PITCH]` devices read Pitch 2; Pending 0, one
+  bar later, all nine back to 0. The observer on `live_set tracks` was created on the first
+  application without complaint. The Live parameter list now reads `Current` and `Pend`, in
+  that order: renaming the dial changed the order of the device's parameters, which anything
+  addressing them by index must know.
+
 ## Not yet verified
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
