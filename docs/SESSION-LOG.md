@@ -21,11 +21,14 @@ HANDOFF, the design in PLAN.
 | Phase | 0, ground (`docs/PLAN.md` §2) |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
-| Open | the development-loop test (one set reload); the leading-space rename (Live closed); the three Live checks of PLAN §3 |
+| Open | the development-loop test (one set reload); the three Live checks of PLAN §3 |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-08** — Leading space removed from the Drum Mapper's file name (`2417ea4`): the
+  installed file renamed and both sets rewritten with `fix_als_path.py` while Live was
+  closed; originals kept as `*.als.pre-fix-20260908-2326*` beside them.
 - **2026-09-08** — Tools and first documents committed (`c97b50b`); every tool exercised dry
   against the seven devices. Development-loop test started on the installed Transpose Q: a
   marker appended to the loose `alberton-transpose-v2.js` beside the embedded device did
