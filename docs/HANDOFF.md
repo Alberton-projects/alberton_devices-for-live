@@ -60,6 +60,19 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   (Kick 0, Snare 1, HiHat 2, Cymbals 3). The instance on *Cymbals* is switched off (Device
   On off); it was not touched, and whether that is deliberate is a question for the owner.
 
+## Verified on 2026-09-09
+
+- **Kit Selector, Phase 1 script, on the live set.** Installed in development form and driven
+  over MCP: the Kick dial set to 5 wrote 5 to the macro named "Chain Selector" on the Kick
+  track through the cached path, and back to 0; pressing Send ran `sendAll`, which took the
+  master from −6 dB to 0 dB (the only volume not already at its default) and left every other
+  volume at its policy value, and the Receiver on Bass Synth showed PC 3 for the BassS dial at
+  3, so the queue, the broadcast and the receiver all work with the guarded script. A
+  `live.button` pressed over the LOM stays at 1 until written back to 0.
+- The Transpose Q display dial came back as 7 after the set was reopened, so the set was
+  saved at some point during the tests with the marker value in it; a display dial only,
+  reset to 0.
+
 ## Not yet verified
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

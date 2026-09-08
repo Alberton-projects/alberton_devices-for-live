@@ -14,11 +14,11 @@ HANDOFF, the design in PLAN.
 
 ---
 
-## Current state — 2026-09-08
+## Current state — 2026-09-09
 
 | | |
 |---|---|
-| Phase | 1, safety and speed (`docs/PLAN.md` §2); Phase 0 complete |
+| Phase | 1, safety and speed (`docs/PLAN.md` §2): 1.1 Kit Selector done and verified in Live; 1.2 Gamepad, 1.3 Transpose Q, 1.4 mappers open |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
@@ -27,6 +27,10 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-09** — Kit Selector script rewritten for Phase 1 (`827d6ed`): guarded Live API
+  access, caches built at refresh, self-refresh on track-count change, debug flag. 26 tests.
+  Verified on the set over MCP (HANDOFF): chain write through the cache, Send with the
+  volume policy, program change arriving at a receiver.
 - **2026-09-08** — Development loop settled (`docs/HANDOFF.md`): the embedded script wins over
   a loose copy; a plain device loads a symlinked script and `autowatch` follows the symlink;
   a recompile resets script state. Transpose Q left installed in development form.
