@@ -44,10 +44,16 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   through, as the Receiver does, and feed CC 123 to the script's `reset`.
 - **Transpose Q's display dial** (`live.dial[1]`, the applied value) has range 0–127, so a
   negative transposition shows as 0. `Pending` is −12..12.
-- **Development-loop test, first half.** A marker appended to the loose
-  `alberton-transpose-v2.js` beside the installed (embedded) Transpose Q did not reach the
-  running instance: either the embedded copy is what Max compiled, or `autowatch` is inert
-  for it. The set reload decides (SESSION-LOG).
+- **When a script is both embedded and beside the device, Max compiles the embedded copy.**
+  A marker appended to the loose `alberton-transpose-v2.js` beside the installed (embedded)
+  Transpose Q reached neither the running instance nor a freshly loaded one after the set was
+  reopened. So a loose `.js` next to a released device is inert, and the development form has
+  to be a *plain* device. (Second half of the test, plain device with the script symlinked
+  from the repository, in progress.)
+- **Renaming the Drum Mapper file worked as designed.** After `fix_als_path.py` on both sets
+  and the rename, the four instances loaded under the new name with their modes intact
+  (Kick 0, Snare 1, HiHat 2, Cymbals 3). The instance on *Cymbals* is switched off (Device
+  On off); it was not touched, and whether that is deliberate is a question for the owner.
 
 ## Not yet verified
 
