@@ -11,7 +11,7 @@ var mode = 0;
 
 // Rangos válidos por instrumento (notas que pasan sin modificar)
 var KICK_RANGE = [35, 36];  // B0, C1
-var SNARE_RANGE = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52];  // C#1 a E3 (articulaciones snare)
+var SNARE_RANGE = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52];  // C#1 a E2 (articulaciones snare)
 var HIHAT_RANGE = [42, 44, 46];  // F#1, G#1, A#1
 var CYMBAL_RANGE = [49, 51, 53, 55, 57, 59];  // Crashes, rides, bells
 
@@ -26,7 +26,10 @@ var CYMBAL_RIDE = 51;   // D#2
 var CYMBAL_BELL = 53;   // F2
 var CYMBAL_CRASH = [49, 57];  // C#2, A2
 
-// Almacenar mapeo de notas activas (para note-off)
+// Notas activas: pitch de entrada -> cola de pitches de salida.
+// Una cola, no un valor: la misma nota de entrada puede estar sonando dos
+// veces a la vez (dos fuentes en una pista, o un secuenciador retrigenado una
+// nota mantenida). Un mapa simple perdia el primer mapeo y colgaba esa nota.
 var activeNotes = {};
 
 // Helper: comprobar si nota está en array
@@ -54,9 +57,10 @@ function list() {
     
     // Note OFF - usar nota almacenada
     if (vel === 0) {
-        if (activeNotes[inputPitch] !== undefined) {
-            outputPitch = activeNotes[inputPitch];
-            delete activeNotes[inputPitch];
+        var queue = activeNotes[inputPitch];
+        if (queue !== undefined && queue.length > 0) {
+            outputPitch = queue.shift();
+            if (queue.length === 0) delete activeNotes[inputPitch];
             outlet(0, [outputPitch, 0]);
         }
         return;
@@ -81,7 +85,8 @@ function list() {
     }
     
     // Almacenar mapeo para note-off
-    activeNotes[inputPitch] = outputPitch;
+    if (activeNotes[inputPitch] === undefined) activeNotes[inputPitch] = [];
+    activeNotes[inputPitch].push(outputPitch);
     
     outlet(0, [outputPitch, vel]);
 }

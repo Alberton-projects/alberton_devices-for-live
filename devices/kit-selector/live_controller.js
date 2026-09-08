@@ -677,6 +677,7 @@ var VOL_BASS_ELECTRIC = 0.85;
 var VOL_RESAMPLE = 0.85;
 var VOL_SCRATCHER = 0.36;
 var VOL_VOCALS = 0.625;
+var VOL_MASTER = 0.85;        // 0 dB; VOL_DEFAULT 0.70 = -6 dB
 
 var VOLUME_EXCEPTIONS = {
     "Bass Electric": VOL_BASS_ELECTRIC,
@@ -734,7 +735,7 @@ function resetVolumes() {
     masterApi.path = "live_set master_track mixer_device volume";
     
     if (masterApi.id && masterApi.id != 0) {
-        masterApi.set("value", VOL_DEFAULT);
+        masterApi.set("value", VOL_MASTER);
         resetCount++;
     }
     
