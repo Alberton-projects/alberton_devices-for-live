@@ -48,8 +48,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   A marker appended to the loose `alberton-transpose-v2.js` beside the installed (embedded)
   Transpose Q reached neither the running instance nor a freshly loaded one after the set was
   reopened. So a loose `.js` next to a released device is inert, and the development form has
-  to be a *plain* device. (Second half of the test, plain device with the script symlinked
-  from the repository, in progress.)
+  to be a *plain* device. The second half settled the development form: a *plain* device with its script
+  **symlinked** from the repository loads that file (dial 7 after the reload), and
+  `autowatch 1` follows the symlink (dial 8 within seconds of saving, no reload). One caveat
+  that matters: **a recompile resets the script's global state**, every `var` included, so a
+  device whose script holds state needs its init run again after a save: `refresh` on the Kit
+  Selector, `↻` on the Gamepad. Hence the rule: development form only during a work session,
+  release form before a show.
 - **Renaming the Drum Mapper file worked as designed.** After `fix_als_path.py` on both sets
   and the rename, the four instances loaded under the new name with their modes intact
   (Kick 0, Snare 1, HiHat 2, Cymbals 3). The instance on *Cymbals* is switched off (Device
@@ -57,6 +62,4 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 
 ## Not yet verified
 
-- Which copy the `js` object loads when a script is both embedded and beside the device.
-- Whether `autowatch 1` follows a symlinked script inside Live. Phase 0.3 answers both.
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

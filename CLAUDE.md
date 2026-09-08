@@ -67,6 +67,8 @@ appear here: not in code, not in constants, not in comments.
 
 Development form: `python3 tools/install.py --dev` writes each device plain into the User
 Library and symlinks its scripts from this repository, so `autowatch 1` reloads a script edit
-the moment it is saved. Release form: `tools/embed.py --write`, then `tools/check_embedded.py`,
-then `tools/install.py --release`. Verify against the real set, not only by reading: write a
+the moment it is saved (verified 2026-09-08). A recompile resets the script's global state, so
+run the device's init again after a save (`refresh` on the Kit Selector, `↻` on the Gamepad).
+Release form: `tools/embed.py --write`, then `tools/check_embedded.py`, then
+`tools/install.py --release`. **Before a show, every device is installed in release form.** Verify against the real set, not only by reading: write a
 parameter, read it back over MCP, compare.

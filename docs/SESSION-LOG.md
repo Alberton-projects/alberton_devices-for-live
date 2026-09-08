@@ -18,14 +18,18 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 0, ground (`docs/PLAN.md` §2) |
+| Phase | 1, safety and speed (`docs/PLAN.md` §2); Phase 0 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
-| Open | the development-loop test (one set reload); the three Live checks of PLAN §3 |
+| Open | the three Live checks of PLAN §3, before V5 is built |
+| Installed form | `transpose-q` in development form (plain device, script symlinked from here); every other device in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-08** — Development loop settled (`docs/HANDOFF.md`): the embedded script wins over
+  a loose copy; a plain device loads a symlinked script and `autowatch` follows the symlink;
+  a recompile resets script state. Transpose Q left installed in development form.
 - **2026-09-08** — Leading space removed from the Drum Mapper's file name (`2417ea4`): the
   installed file renamed and both sets rewritten with `fix_als_path.py` while Live was
   closed; originals kept as `*.als.pre-fix-20260908-2326*` beside them.

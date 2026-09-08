@@ -71,12 +71,14 @@ source changed, not only when it is missing (today it says "already carries" and
 its script from the folder beside it, so `autowatch 1` picks up an edit the moment the file is
 saved and the set does not need reopening for script changes. Patcher changes still need the set
 reloaded. Only at release is the script embedded. The scripts in the User Library are symlinks
-into the working folder, so there is one source. Phase 0 confirms this loop works before anything
-else is touched.
+into the working folder, so there is one source. Confirmed on 2026-09-08: a plain device loads the
+symlinked script and `autowatch` follows the symlink. A recompile resets the script's global
+state, so a device whose script holds state (Kit Selector, Gamepad) needs its init run again
+after a save. Development form only during a work session; release form before a show.
 
 ## 2. Phases
 
-### Phase 0 — ground, no behaviour changes
+### Phase 0 — ground, no behaviour changes — done 2026-09-08
 
 1. Create the working folder; import the January originals, then the current state; add
    `check_embedded.py`, `embed.py`, `unembed.py`.
