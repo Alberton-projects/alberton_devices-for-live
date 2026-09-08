@@ -59,7 +59,9 @@ test('refresh caches the four drum tracks and the melodic tracks that expose a p
   assert.equal(d.ctx.melodicCache.bass_synth.paramName, 'Program');
   assert.equal(d.ctx.melodicCache.pad1.needsConfiguration, true, 'a plugin with no preset parameter is cached as needing configuration');
   assert.deepEqual(d.take(), [['refresh_complete']]);
-  assert.match(d.posts.join('\n'), /Scan complete: 4\/4 drums, 2\/8 melodic/);
+  assert.equal(d.posts.length, 0, 'a healthy scan posts nothing unless debug is on');
+  d.send('debug', 1); d.send('refresh');
+  assert.match(d.posts.join('\n'), /refresh: 4\/4 drums, 2\/8 melodic, 3\/9 fx, 16 volumes/);
 });
 
 test('a drum dial writes the first parameter whose name contains "Chain", the enabled macro', () => {
@@ -176,9 +178,53 @@ test('preset names: set, get, pack and unpack', () => {
   assert.deepEqual(d.take(), [['name', 3, 'No fas pas por']]);
 });
 
-test('today, a track that answers nothing stops refresh with an exception', () => {
+test('a track that answers nothing is skipped and the scan goes on', () => {
   const d = boot();
   byName(d.live, 'Snare').name = null;
-  assert.throws(() => d.send('refresh'), (e) => e.name === 'TypeError');   // the vm's TypeError is another realm's
-  assert.deepEqual(Object.keys(d.ctx.drumCache), ['kick'], 'the scan died after the first drum track');
+  d.send('refresh');
+  assert.deepEqual(Object.keys(d.ctx.drumCache).sort(), ['cymbals', 'hihat', 'kick']);
+  assert.deepEqual(d.take(), [['refresh_complete']]);
+  assert.match(d.posts.join('\n'), /scan of track 2 failed/);
+});
+
+test('sendAll refreshes by itself when nothing is cached, as after a recompile', () => {
+  const d = boot();
+  d.send('kick', 4);
+  assert.equal(d.liveLog.length, 0, 'before any refresh a dial writes nothing');
+  d.send('sendAll');
+  assert.equal(Object.keys(d.ctx.drumCache).length, 4);
+  const chains = d.liveLog.filter(w => /devices 1 parameters 1$/.test(w.path));
+  assert.deepEqual(chains.map(w => w.value), [4, 0, 0, 0]);
+});
+
+test('sendAll refreshes when the set gained a track', () => {
+  const d = boot();
+  d.send('refresh'); d.take();
+  d.live.live_set.children.tracks.push(track('New', []));
+  d.send('debug', 1);
+  d.send('sendAll');
+  assert.match(d.posts.join('\n'), /track count changed, refreshing/);
+  assert.equal(d.ctx.volumeTargets.length, 17);
+});
+
+test('a disabled parameter is reported and the rest of the recall still happens', () => {
+  const d = boot();
+  d.send('refresh'); d.take();
+  byName(d.live, 'Kick').children.devices[1].children.parameters[1].disabled = true;
+  d.send('sendAll');
+  assert.ok(d.posts.some(p => /disabled/.test(p)), 'Live reports the disabled parameter');
+  const chains = d.liveLog.filter(w => /devices 1 parameters 1$/.test(w.path));
+  assert.equal(chains.length, 3, 'the other three chains were written');
+  assert.equal(volumeOf(byName(d.live, 'Snare')), 0.70, 'and the volumes too');
+});
+
+test('a track that disappears between refresh and recall does not stop the recall', () => {
+  const d = boot();
+  d.send('refresh'); d.take();
+  const tracks = d.live.live_set.children.tracks;
+  tracks[1].children.devices.length = 0;           // Kick lost its rack: the cached path dangles
+  d.send('sendAll');
+  assert.match(d.posts.join('\n'), /chain selector of 'Kick' is gone/);
+  assert.equal(volumeOf(byName(d.live, 'Snare')), 0.70);
+  assert.ok(d.take().some(o => o[0] === 'sent_all'));
 });
