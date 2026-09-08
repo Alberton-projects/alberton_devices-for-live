@@ -15,6 +15,7 @@ const DEVICES = path.join(__dirname, '..', 'devices');
 class FakeTask {
   constructor(fn, obj, ...args) { this.fn = fn; this.obj = obj; this.args = args; this.interval = 0; this.due = null; this.repeats = 0; }
   schedule(ms) { this.due = FakeTask.now + (ms || 0); FakeTask.pending.add(this); }
+  // Assumes Max runs the first repeat after one interval, not at once.
   repeat(n) { this.repeats = n === undefined ? Infinity : n; this.due = FakeTask.now + this.interval; FakeTask.pending.add(this); }
   cancel() { FakeTask.pending.delete(this); this.due = null; }
   static reset() { FakeTask.now = 0; FakeTask.pending = new Set(); }
@@ -34,16 +35,22 @@ class FakeTask {
 }
 FakeTask.reset();
 
-// A LiveAPI stand-in driven by a plain object tree: {"live_set": {props..., children: {"tracks": [...]}}}
-// Only what the scripts use: .path, .id, get(), set(), getcount(), call(). Paths are
-// space-separated as in Max ("live_set tracks 3 devices 0").
-function makeLiveAPI(tree, log) {
+// A LiveAPI stand-in driven by a plain object tree. A node is {id, ...properties,
+// children: {name: [nodes] for a list such as "tracks", or a single node such as
+// "mixer_device"}}. Paths are space-separated as in Max: "live_set tracks 3 devices 0",
+// "live_set master_track mixer_device volume". Only what the scripts use: path, id,
+// get(), set(), getcount(), call(). Like Max, set() on a disabled parameter posts an
+// error and goes on; it does not throw.
+function makeLiveAPI(tree, log, posts) {
   function resolve(p) {
     const parts = String(p).trim().split(/\s+/).filter(Boolean);
     let node = tree[parts[0]];
-    for (let i = 1; node && i < parts.length; i += 2) {
-      const kids = (node.children || {})[parts[i]];
-      node = kids ? kids[parseInt(parts[i + 1], 10)] : undefined;
+    let i = 1;
+    while (node && i < parts.length) {
+      const kid = (node.children || {})[parts[i]];
+      i += 1;
+      if (Array.isArray(kid)) { node = kid[parseInt(parts[i], 10)]; i += 1; }
+      else node = kid;
     }
     return node || null;
   }
@@ -51,10 +58,20 @@ function makeLiveAPI(tree, log) {
     constructor(a, b) { this._path = ''; this.node = null; const p = typeof a === 'function' ? b : a; if (p !== undefined) this.path = p; }
     get path() { return this._path; }
     set path(p) { this._path = String(p); this.node = resolve(p); }
-    get id() { return this.node ? (this.node.id || 1) : 0; }
-    get(prop) { if (!this.node) return null; if (prop in (this.node.children || {})) { const out = []; this.node.children[prop].forEach((c, i) => { out.push('id', c.id || (i + 1)); }); return out; } return this.node[prop]; }
-    set(prop, v) { if (!this.node) return; if (this.node.disabled) throw new Error("Value cannot be set, the parameter is disabled"); this.node[prop] = v; log.push({ path: this._path, prop, value: v }); }
-    getcount(kid) { return this.node && this.node.children && this.node.children[kid] ? this.node.children[kid].length : 0; }
+    get id() { return this.node ? this.node.id : 0; }
+    get(prop) {
+      if (!this.node) return null;
+      const kid = (this.node.children || {})[prop];
+      if (Array.isArray(kid)) { const out = []; kid.forEach(c => out.push('id', c.id)); return out; }
+      if (kid) return ['id', kid.id];
+      return prop in this.node ? this.node[prop] : null;
+    }
+    set(prop, v) {
+      if (!this.node) return;
+      if (this.node.disabled) { posts.push('ERROR Value cannot be set, the parameter is disabled'); return; }
+      this.node[prop] = v; log.push({ path: this._path, prop, value: v });
+    }
+    getcount(kid) { const k = this.node && this.node.children && this.node.children[kid]; return Array.isArray(k) ? k.length : 0; }
     call(method, ...args) { log.push({ path: this._path, call: method, args }); return null; }
   };
 }
@@ -75,7 +92,7 @@ function load(device, script, opts = {}) {
     outlet: (i, ...a) => out.push({ index: i, args: Array.from(a.length === 1 && Array.isArray(a[0]) ? a[0] : a) }),
     arrayfromargs: (args) => Array.prototype.slice.call(args),
     Task: FakeTask,
-    LiveAPI: makeLiveAPI(opts.live || {}, liveLog),
+    LiveAPI: makeLiveAPI(opts.live || {}, liveLog, posts),
     Math, parseInt, parseFloat, String, Number, Array, Object, isNaN,
   };
   vm.createContext(ctx);
