@@ -37,6 +37,18 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 - **The 2026-09-03 change** (`VOL_MASTER = 0.85`) was made on stage and is recorded as §12 of
   the August review, closed: V5 stores the Main level per kit and the constant goes away.
 
+- **Both mappers pass notes only.** `midiin → midiparse` outlet 0 → script → `midiformat`
+  inlet 0 → `midiout`, and nothing else is connected. Control changes, pitch bend, aftertouch
+  and program changes stop at the mapper. On *Bass Electric* that means no sustain pedal and no
+  pitch bend reach the Fretless Bass. Fix in Phase 1: connect the other outlets straight
+  through, as the Receiver does, and feed CC 123 to the script's `reset`.
+- **Transpose Q's display dial** (`live.dial[1]`, the applied value) has range 0–127, so a
+  negative transposition shows as 0. `Pending` is −12..12.
+- **Development-loop test, first half.** A marker appended to the loose
+  `alberton-transpose-v2.js` beside the installed (embedded) Transpose Q did not reach the
+  running instance: either the embedded copy is what Max compiled, or `autowatch` is inert
+  for it. The set reload decides (SESSION-LOG).
+
 ## Not yet verified
 
 - Which copy the `js` object loads when a script is both embedded and beside the device.

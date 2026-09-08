@@ -26,6 +26,12 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-08** — Tools and first documents committed (`c97b50b`); every tool exercised dry
+  against the seven devices. Development-loop test started on the installed Transpose Q: a
+  marker appended to the loose `alberton-transpose-v2.js` beside the embedded device did
+  not reach the running instance, so either the embedded copy is the one loaded or
+  `autowatch` is inert there; the set reload decides. Marker to be removed afterwards
+  (backup `_archive/backups/alberton-transpose-v2.js.pre-devloop-20260908-231203`).
 - **2026-09-08** — Working folder created. History starts with the devices as they were
   before the 2026-08-04 review, then as installed today. Tools written on top of the August
   `amxd.py`. The Catalan handoff that started this lives in the MCP repository's working

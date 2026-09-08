@@ -1,0 +1,8 @@
+{
+  "name": "alberton_devices-for-live",
+  "private": true,
+  "description": "Max for Live devices; the tests run the device scripts under Node against a stub of the Max globals",
+  "scripts": {
+    "test": "node --test 'test/*.test.js'"
+  }
+}
