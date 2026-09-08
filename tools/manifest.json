@@ -2,8 +2,7 @@
   "install_root": "~/Music/Ableton/User Library",
   "devices": [
     {"dir": "bass-mapper",     "file": "Alberton Bass Mapper.amxd",              "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton Bass Mapper.amxd"},
-    {"dir": "drum-mapper",     "file": "Alberton Drum Mapper.amxd",              "install": "Presets/MIDI Effects/Max MIDI Effect/ Alberton Drum Mapper.amxd",
-     "note": "the installed name keeps its leading space until the two .als files are patched (PLAN, Phase 0.4)"},
+    {"dir": "drum-mapper",     "file": "Alberton Drum Mapper.amxd",              "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton Drum Mapper.amxd"},
     {"dir": "transpose-q",     "file": "Alberton Transpose Q.amxd",              "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton Transpose Q.amxd"},
     {"dir": "kit-selector",    "file": "Alberton_Kit_Selector_V4.3.amxd",        "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton_Kit_Selector_V4.3.amxd"},
     {"dir": "kit-receiver",    "file": "Alberton PC Kit Selector Receiver.amxd", "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton PC Kit Selector Receiver.amxd"},
