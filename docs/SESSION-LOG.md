@@ -22,7 +22,7 @@ HANDOFF, the design in PLAN.
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q` in development form (plain device, script symlinked from here); every other device in release form |
+| Installed form | `transpose-q` and `kit-selector` in development form (plain device, script symlinked from here); every other device in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
