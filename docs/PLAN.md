@@ -92,12 +92,12 @@ after a save. Development form only during a work session; release form before a
 4. Leading space: rename the file, patch the two `.als` with `fix_als_path.py` (Live closed, backups
    first), reopen the set, confirm the four Drum Mapper instances load and keep their Mode.
 
-### Phase 1 — safety and speed, same behaviour
+### Phase 1 — safety and speed, same behaviour — done 2026-09-09
 
 | Device | Change | How it is verified |
 |---|---|---|
 | Kit Selector V4.3 — **done 2026-09-09** | `try/catch` around every LiveAPI use; a `DEBUG` flag in front of every `post()`; cache the drum-chain parameter paths at `refresh` | recall a kit on the set, read the four "Chain Selector" macros and the volumes over MCP |
-| Gamepad — **code done 2026-09-09, reopen test pending** | `fire_slot` uses the known index: one LiveAPI object per fire. Track selection owned by the script and saved with the set (see §4). Comment on `tracks.length / 2` | fire a slot from the pad, watch `playing_slot` over MCP; reopen the set, the menu shows the same track |
+| Gamepad — **done 2026-09-09, reopen verified; pad firing pending** | `fire_slot` uses the known index: one LiveAPI object per fire. Track selection owned by the script and saved with the set (see §4). Comment on `tracks.length / 2` | fire a slot from the pad, watch `playing_slot` over MCP; reopen the set, the menu shows the same track |
 | Transpose Q — **done 2026-09-09** | `try/catch`; `DEBUG` flag; a LiveAPI observer on `live_set tracks` clears the cache; `bang` and `msg_int` unified; the display dial made visible as `Current`, −12..12 | set Pending, wait for the downbeat, read the nine `[PITCH]` values over MCP, restore 0 |
 | Mappers — **done 2026-09-09, verified with sound** | pass every non-note MIDI message through (today only notes survive the mapper, so no sustain or pitch bend reaches the Fretless Bass); `note-queue.js` shared by text with `reset` and CC 123 all-notes-off; pool built once; `isInRange` by lookup; cymbals deterministic, hi-hat random with the reason in a comment; the Transpose Q display dial gets the range −12..12 | Node tests on every mapping function (characterisation tests written first, `npm test`); a held-note and a pedal test in Live |
 | All | comments in English | — |

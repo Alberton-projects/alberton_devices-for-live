@@ -126,11 +126,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 - **`dict: could not retrieve key 1`**, four times at load, comes from the Gamepad's own
   patcher (its `dict` objects), not from anything changed here. Noted, not chased.
 
+- **A bare `pattr @parameter_enable 1` keeps a symbol with the set.** Verified 2026-09-09 on
+  the Gamepad: the track chosen on the menu before closing the set was back after reopening.
+  So a script can own a piece of state by name and have Live save it, with a `pattr` as the
+  keeper and `prepend restore` feeding it back; no `live.*` object and no js parameter needed.
+
 ## Not yet verified
 
-- The Gamepad after a save and reopen: the menu must show the track chosen before the save
-  (a `pattr @parameter_enable 1` holding a symbol is the mechanism under test; the Kit
-  Selector's pattrstorage proves blob parameters, not a bare pattr with a symbol). Firing
-  from the pad on the chosen track, and the scenes.
+- The Gamepad firing from the pad on the chosen track, and the scenes (needs the pad).
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
