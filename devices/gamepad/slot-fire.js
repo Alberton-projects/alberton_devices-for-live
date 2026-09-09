@@ -9,6 +9,11 @@
 
     Inlet 0:  refresh | int (the menu's choice) | list <state> <slot> | scene <state> <n>
               | restore <name...> (from the pattr) | debug <0|1>
+
+    The menu stays a Live parameter because a live.menu only takes its list through
+    _parameter_range in parameter mode. Its own saved value is never trusted: Live restores
+    it against the placeholder list saved in the patcher, so it is clamped and meaningless.
+    An int that arrives before the first scan is ignored; the pattr's name wins.
     Outlet 0: status -- fired <slot>, scene_fired <n>
     Outlet 1: the menu -- _parameter_range <names...>, then set <index>
     Outlet 2: the pattr -- the chosen track's name, to be saved with the set
@@ -66,6 +71,7 @@ function init() {
 
 function refresh() {
     scan_tracks();
+    if (track_names.length === 0) return;   // the Live API was not ready: nothing to show yet
     update_menu();
     watchTracks();
 }

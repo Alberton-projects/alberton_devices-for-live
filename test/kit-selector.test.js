@@ -76,11 +76,13 @@ test('a drum dial writes the first parameter whose name contains "Chain", the en
   assert.equal(d.posts.filter(p => /disabled/.test(p)).length, 0, 'the disabled real Chain Selector is never reached');
 });
 
-test('a drum dial before refresh writes nothing and says so', () => {
+test('a drum dial before any refresh builds the caches itself and writes', () => {
   const d = boot();
   d.send('snare', 5);
-  assert.equal(d.liveLog.length, 0);
-  assert.match(d.posts.join('\n'), /snare not in cache/);
+  assert.equal(Object.keys(d.ctx.drumCache).length, 4);
+  const writes = d.liveLog.filter(w => w.prop === 'value');
+  assert.deepEqual(writes.map(w => [w.path, w.value]), [['live_set tracks 2 devices 1 parameters 1', 5]]);
+  assert.equal(d.posts.length, 0);
 });
 
 test('melodic dials queue program changes, one every 150 ms, then the queue stops', () => {
@@ -189,8 +191,7 @@ test('a track that answers nothing is skipped and the scan goes on', () => {
 
 test('sendAll refreshes by itself when nothing is cached, as after a recompile', () => {
   const d = boot();
-  d.send('kick', 4);
-  assert.equal(d.liveLog.length, 0, 'before any refresh a dial writes nothing');
+  d.ctx.currentValues.kick = 4;                        // as the compile-time sync would leave it
   d.send('sendAll');
   assert.equal(Object.keys(d.ctx.drumCache).length, 4);
   const chains = d.liveLog.filter(w => /devices 1 parameters 1$/.test(w.path));
@@ -236,4 +237,26 @@ test('at compile time the script reads the twelve dials without writing anything
   assert.equal(d.ctx.currentValues.kick, 5); assert.equal(d.ctx.currentValues.bass_synth, 9); assert.equal(d.ctx.currentValues.lead2, 3);
   assert.equal(d.ctx.currentValues.snare, 0);
   assert.equal(d.liveLog.length, 0); assert.deepEqual(d.take(), []);
+});
+
+test('refresh retries every half second until the Live API answers, quietly', () => {
+  const tree = {};                                     // live_set not reachable yet
+  const d = load('kit-selector', 'live_controller.js', { live: tree });
+  d.send('refresh');
+  assert.equal(d.ctx.cacheValid, false);
+  assert.equal(d.posts.length, 0, 'no warning while it is still retrying');
+  d.Task.advance(500);
+  assert.equal(d.ctx.cacheValid, false, 'still nothing to scan');
+  tree.live_set = rig().live_set;                      // the set comes up
+  d.Task.advance(500);
+  assert.equal(d.ctx.cacheValid, true);
+  assert.equal(Object.keys(d.ctx.drumCache).length, 4);
+  assert.deepEqual(d.take(), [['refresh_complete']]);
+});
+
+test('after ten seconds without a Live API, refresh gives up with one warning', () => {
+  const d = load('kit-selector', 'live_controller.js', { live: {} });
+  d.send('refresh');
+  d.Task.advance(11000);
+  assert.equal(d.posts.filter(p => /never answered/.test(p)).length, 1);
 });

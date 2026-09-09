@@ -241,6 +241,24 @@ function ensureCache() {
     refresh();
 }
 
+var retryTask = null;
+var retriesLeft = 0;
+
+function retryRefresh() {
+    if (retryTask) return;
+    retriesLeft = 20;                      // ten seconds, then give up quietly; the first use refreshes anyway
+    retryTask = new Task(function () {
+        retryTask.cancel();
+        retryTask = null;
+        if (retriesLeft-- <= 0) {
+            warn("refresh: the Live API never answered; caches will be built on first use");
+            return;
+        }
+        refresh();
+    }, this);
+    retryTask.schedule(500);
+}
+
 function refresh() {
     drumCache = {};
     melodicCache = {};
@@ -250,7 +268,8 @@ function refresh() {
 
     var api = new LiveAPI("live_set");
     if (!api.id) {
-        warn("refresh: live_set is not reachable yet");
+        // live.thisdevice can fire before the set's Live API answers; try again shortly.
+        retryRefresh();
         return;
     }
     var trackCount = api.getcount("tracks");
@@ -463,6 +482,7 @@ var currentValues = {
 };
 
 function setDrumChain(trackKey, value) {
+    ensureCache();
     var cache = drumCache[trackKey];
     if (!cache) {
         warn("setDrumChain: " + trackKey + " not in cache (send refresh)");

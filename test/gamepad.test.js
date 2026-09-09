@@ -84,3 +84,16 @@ test('scenes fire by number; a missing scene or slot is reported, not fatal', ()
   d.send('refresh'); d.ctx.list(1, 7);
   assert.match(d.posts.join('\n'), /no clip slot 7/);
 });
+
+test('with the Live API not ready, refresh shows nothing and a menu value is ignored; the pattr name still wins', () => {
+  const d = boot({ names: [] });                       // an unreachable live_set: no tracks answer
+  d.send('refresh');
+  assert.deepEqual(menu(d), [], 'no empty list is sent to the menu');
+  d.send('msg_int', 2);                                // the menu's clamped restored value
+  assert.equal(d.ctx.selected_name, '');
+  assert.deepEqual(d.take(2), []);
+  d.send('restore', 'Snare');
+  d.live.live_set.children.tracks.push(track('Kick'), track('Snare'));
+  d.send('init');
+  assert.deepEqual(menu(d).pop(), ['set', 1]);
+});
