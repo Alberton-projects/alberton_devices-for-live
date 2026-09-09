@@ -77,17 +77,32 @@ class Patcher:
         return self.box(oid, maxclass, rect=rect, parameter_enable=1, numinlets=1, numoutlets=numoutlets,
                         outlettype=outlettype, saved_attribute_attributes={"valueof": v}, varname=varname or oid, **extra)
 
-    def numbox(self, oid, longname, rect, initial=0, lo=0, hi=127, unit=0, shortname=None, varname=None):
+    def numbox(self, oid, longname, rect, initial=0, lo=0, hi=127, unit=0, shortname=None, varname=None, is_float=False):
         return self._param(oid, "live.numbox", longname, shortname, rect,
                            {"parameter_initial": [initial], "parameter_initial_enable": 1, "parameter_mmin": lo,
-                            "parameter_mmax": hi, "parameter_type": 1, "parameter_unitstyle": unit},
+                            "parameter_mmax": hi, "parameter_type": 0 if is_float else 1, "parameter_unitstyle": unit},
                            varname, 2, ["", "float"])
 
-    def dial(self, oid, longname, rect, initial=0, lo=0, hi=127, unit=0, shortname=None, varname=None):
-        return self._param(oid, "live.dial", longname, shortname, rect,
-                           {"parameter_initial": [initial], "parameter_initial_enable": 1, "parameter_mmin": lo,
-                            "parameter_mmax": hi, "parameter_type": 1, "parameter_unitstyle": unit},
-                           varname, 2, ["", "float"])
+    def dial(self, oid, longname, rect, initial=0, lo=0, hi=127, unit=0, shortname=None, varname=None, is_float=False, tiny=False):
+        """tiny: the knob with its name beside it (appearance 1), 15 px high."""
+        oid = self._param(oid, "live.dial", longname, shortname, rect,
+                          {"parameter_initial": [initial], "parameter_initial_enable": 1, "parameter_mmin": lo,
+                           "parameter_mmax": hi, "parameter_type": 0 if is_float else 1, "parameter_unitstyle": unit},
+                          varname, 2, ["", "float"])
+        if tiny:
+            self.boxes[-1]["appearance"] = 1
+        return oid
+
+    def textbutton(self, oid, label, rect, longname=None, varname=None):
+        """A live.text in momentary mode: a button that says what it does."""
+        longname = longname or label
+        self.params[oid] = [longname, longname, 0]
+        return self.box(oid, "live.text", rect=rect, parameter_enable=1, mode=0, numinlets=1, numoutlets=2,
+                        outlettype=["", ""], text=label, texton=label, transition=2, fontsize=10.0,
+                        saved_attribute_attributes={"valueof": {"parameter_button_mode": "Momentary", "parameter_enum": ["val1", "val2"],
+                                                                "parameter_longname": longname, "parameter_mmax": 1, "parameter_modmode": 0,
+                                                                "parameter_shortname": longname, "parameter_type": 2}},
+                        varname=varname or oid)
 
     def menu(self, oid, longname, rect, items, initial=0, shortname=None, varname=None):
         return self._param(oid, "live.menu", longname, shortname, rect,

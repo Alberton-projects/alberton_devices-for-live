@@ -22,6 +22,11 @@
       "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton_Kit_Selector_V4.3.amxd"
     },
     {
+      "dir": "kit-selector",
+      "file": "Alberton Kit Selector V5.amxd",
+      "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton Kit Selector V5.amxd"
+    },
+    {
       "dir": "kit-receiver",
       "file": "Alberton PC Kit Selector Receiver.amxd",
       "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton PC Kit Selector Receiver.amxd"
