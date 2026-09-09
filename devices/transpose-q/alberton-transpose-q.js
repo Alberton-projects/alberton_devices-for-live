@@ -1,24 +1,26 @@
 /*
     Alberton Transpose Q -- transposition quantised to the bar
     ==========================================================
-    A pending transposition, set by the Pending dial, is applied on the next downbeat, so
-    the whole rig moves together on the bar line. The downbeat comes from plugsync~ in the
-    patcher as a bang on inlet 1; the applied value leaves outlet 0 for the display dial.
+    A pending transposition, set by the Pending dial, is applied on the next bar line, or
+    on the next beat, or at once, as the Quantize menu says; so the whole rig moves
+    together, in time. The beat count comes from plugsync~ in the patcher as an int on
+    inlet 1; the applied value leaves outlet 0 for the Current dial.
 
-    Targets: on every track whose name says it is melodic, the first device named [PITCH]
-    (or of class MidiPitcher), its parameter named Pitch. They are found once and kept as
-    paths, because applyTranspose runs ON THE DOWNBEAT and must not walk the set: scanning
-    29 tracks and every device on each built dozens of LiveAPI objects at the exact instant
-    the bar turned over. The cache clears itself when the set's track list changes (a
-    LiveAPI observer on live_set tracks), when the track count differs, or on "rescan".
+    Targets: every device in the set whose name carries the tag [PITCH], on any track but
+    this device's own; its parameter named Pitch is written. Rename any Pitch device to
+    [PITCH] to opt its track in. Nothing else about the set is assumed.
 
-    2026-09-09, Phase 1 of the repository plan, same behaviour: every Live API access is
-    guarded; post() is silent unless "debug 1" is sent. V5 replaces the track-name test with
-    a tag on the Pitch device itself (docs/PLAN.md).
+    The targets are found once and kept as paths, because the write runs ON THE BAR LINE
+    and must not walk the set then: scanning every track and device at that instant built
+    dozens of LiveAPI objects at the worst possible moment. The cache clears itself when the
+    set's track list changes (a LiveAPI observer on live_set tracks), when the track count
+    differs, or on "rescan".
+
+    Every Live API access is guarded; post() is silent unless "debug 1" is sent.
 */
 
 autowatch = 1;
-inlets = 2;    // inlet 0: pending / current / rescan / debug; inlet 1: bang on the downbeat
+inlets = 2;    // inlet 0: pending / current / quantize / rescan / debug; inlet 1: the beat count
 outlets = 1;   // the transposition just applied, for the display dial
 
 // ============ LOGGING ============
@@ -53,19 +55,33 @@ function guarded(what, fn) {
 var pendingTranspose = 0;
 var currentTranspose = 0;
 
-// Tracks that carry a [PITCH] device, by name. "midi rec" is excluded because the
-// transposer itself sits there. (V5 drops this list for a tag on the device.)
-var melodicTracks = ["bass", "pad", "piano", "lead", "vocoder"];
+var TAG = "[PITCH]";   // the opt-in: a device carrying this in its name is a target
+
+// Quantize menu: 0 on the bar line, 1 on the beat, 2 at once
+var QUANTIZE_BAR = 0, QUANTIZE_BEAT = 1, QUANTIZE_OFF = 2;
+var quantizeMode = QUANTIZE_BAR;
 
 // ============ MESSAGES ============
 
 function msg_int(val) {
     if (inlet === 0) setPending(val);
-    else downbeat();
+    else beat(val);
 }
 
+// bang on inlet 1: apply now if something is pending (a manual downbeat)
 function bang() {
     if (inlet === 1) downbeat();
+}
+
+// quantize <0|1|2>, from the Quantize menu
+function quantize(v) {
+    quantizeMode = v;
+    if (quantizeMode === QUANTIZE_OFF) downbeat();   // whatever was waiting goes out now
+}
+
+// The beat count within the bar, 1-based, whenever it changes
+function beat(n) {
+    if (quantizeMode === QUANTIZE_BEAT || (quantizeMode === QUANTIZE_BAR && n === 1)) downbeat();
 }
 
 // pending <n>: the value to apply on the next downbeat
@@ -88,6 +104,7 @@ function rescan() {
 function setPending(val) {
     pendingTranspose = val;
     log("pending " + pendingTranspose);
+    if (quantizeMode === QUANTIZE_OFF) downbeat();
 }
 
 function downbeat() {
@@ -110,8 +127,10 @@ function syncFromPatcher() {
     try {
         var pend = patcher.getnamed("live.dial");         // Pending
         var cur = patcher.getnamed("live.dial[1]");       // Current
+        var q = patcher.getnamed("quantize");
         if (pend) pendingTranspose = Math.round(pend.getvalueof());
         if (cur) currentTranspose = Math.round(cur.getvalueof());
+        if (q) quantizeMode = Math.round(q.getvalueof());
     } catch (e) {
         warn("could not read the patcher's controls: " + e);
     }
@@ -140,50 +159,41 @@ function onTracksChanged() {
     }
 }
 
-function isMelodic(trackName) {
-    var name = trackName.toLowerCase();
-    if (name.indexOf("midi rec") >= 0) return false;
-    for (var m = 0; m < melodicTracks.length; m++) {
-        if (name.indexOf(melodicTracks[m]) >= 0) return true;
-    }
-    return false;
-}
-
 function buildTargets() {
     pitchTargets = [];
     var api = new LiveAPI("live_set");
     cachedTrackCount = api.getcount("tracks");
+    var ownTrackId = guarded("own track", function () { return new LiveAPI("this_device canonical_parent").id; });
     for (var t = 0; t < cachedTrackCount; t++) {
-        scanTrack(t);
+        scanTrack(t, ownTrackId);
     }
-    log("cached " + pitchTargets.length + " [PITCH] targets");
+    log("cached " + pitchTargets.length + " " + TAG + " targets");
 }
 
-// One track; an error here skips the track and the scan goes on. Group tracks match by
-// name too ("6 BASS", "9 PADS") but carry no [PITCH] device, so they never get in.
-function scanTrack(t) {
+// One track; an error here skips the track and the scan goes on.
+function scanTrack(t, ownTrackId) {
     guarded("scan of track " + t, function () {
         var trackPath = "live_set tracks " + t;
         var track = new LiveAPI(trackPath);
-        if (!isMelodic(track.get("name").toString())) return;
+        if (ownTrackId && track.id === ownTrackId) return;   // never this device's own track
 
         var deviceCount = track.getcount("devices");
         for (var d = 0; d < deviceCount; d++) {
             var devicePath = trackPath + " devices " + d;
             var device = new LiveAPI(devicePath);
-            var isPitch = device.get("name").toString().indexOf("[PITCH]") >= 0
-                       || device.get("class_name").toString() === "MidiPitcher";
-            if (!isPitch) continue;
+            if (device.get("name").toString().indexOf(TAG) < 0) continue;
 
             var paramCount = device.getcount("parameters");
+            var found = false;
             for (var p = 0; p < paramCount; p++) {
                 var paramPath = devicePath + " parameters " + p;
                 if (new LiveAPI(paramPath).get("name").toString() === "Pitch") {
                     pitchTargets.push(paramPath);
+                    found = true;
                     break;
                 }
             }
-            break;   // one [PITCH] device per track
+            if (!found) warn("'" + device.get("name") + "' on track " + t + " carries " + TAG + " but has no Pitch parameter");
         }
     });
 }

@@ -7,112 +7,117 @@ let nextId = 1;
 const node = (props, children) => ({ id: nextId++, ...props, children: children || {} });
 const param = (name, value, extra) => node({ name, value, min: -48, max: 48, ...extra });
 const device = (name, class_name, params) => node({ name, class_name }, { parameters: params });
-const pitch = (name = '[PITCH]', cls = 'MidiPitcher') => device(name, cls, [param('Device On', 1, { min: 0, max: 1 }), param('Pitch', 0)]);
-const track = (name, devices, extra) => node({ name, is_foldable: 0, ...extra }, { devices });
+const pitch = (name = '[PITCH]') => device(name, 'MidiPitcher', [param('Device On', 1, { min: 0, max: 1 }), param('Pitch', 0)]);
+const track = (name, devices) => node({ name }, { devices });
 
 function rig() {
   nextId = 1;
-  return { live_set: node({ name: 'set' }, { tracks: [
-    track('6 BASS', [], { is_foldable: 1 }),
+  const own = track('MIDI REC', [device('Alberton Transpose Q', 'MxDeviceMidiEffect', []), pitch()]);   // a [PITCH] on the own track: never touched
+  const tracks = [
+    track('6 BASS', []),
     track('Bass Synth', [device('Step', 'MxDeviceMidiEffect', []), pitch()]),
-    track('Bass Electric', [pitch()]),
-    track('Kick', [pitch()]),                                   // not melodic by name: never touched
-    track('Pad 1', [pitch('Pitch Shift', 'MidiPitcher')]),       // matched by class, not by name
-    track('MIDI REC', [pitch()]),                                // excluded by name
+    track('Kick', [pitch('Pitch')]),                              // a Pitch device without the tag: not a target
+    track('Pad 1', [pitch('Pad [PITCH] up')]),                     // the tag anywhere in the name
+    own,
     track('Vocoder', [pitch()]),
-    track('Bass Drum', [device('Drum Rack', 'DrumGroupDevice', [param('Device On', 1)])]),   // "bass" by substring, no [PITCH]
-  ] }) };
+    track('Odd', [device('[PITCH] but not a pitcher', 'AudioEffectGroupDevice', [param('Device On', 1, { min: 0, max: 1 })])]),
+  ];
+  return { live_set: node({ name: 'set' }, { tracks }), this_device: node({}, { canonical_parent: own }) };
 }
-const boot = () => { const live = rig(); const d = load('transpose-q', 'alberton-transpose-v2.js', { live }); d.live = live; return d; };
+const boot = (opts = {}) => { const live = rig(); const d = load('transpose-q', 'alberton-transpose-q.js', { live, controls: opts.controls }); d.live = live; return d; };
 const tracks = (d) => d.live.live_set.children.tracks;
 const pitchOf = (t) => t.children.devices.find(x => x.class_name === 'MidiPitcher').children.parameters[1].value;
-const downbeat = (d) => d.sendOn(1, 'bang');
+const beat = (d, n) => d.sendOn(1, 'msg_int', n);
 
-test('a pending value is applied on the downbeat to every [PITCH] on a melodic track', () => {
+test('on the bar line a pending value reaches every [PITCH] device except those on the own track or without the tag', () => {
   const d = boot();
   d.send('pending', 2);
-  assert.equal(d.liveLog.length, 0, 'nothing is written before the downbeat');
-  downbeat(d);
+  beat(d, 2); beat(d, 3); beat(d, 4);
+  assert.equal(d.liveLog.length, 0, 'not before beat 1');
+  beat(d, 1);
   const ts = tracks(d);
-  assert.equal(pitchOf(ts[1]), 2); assert.equal(pitchOf(ts[2]), 2); assert.equal(pitchOf(ts[4]), 2); assert.equal(pitchOf(ts[6]), 2);
-  assert.equal(pitchOf(ts[3]), 0, 'Kick is not melodic'); assert.equal(pitchOf(ts[5]), 0, 'MIDI REC is excluded');
-  assert.deepEqual(d.take(), [[2]], 'the display dial gets the applied value');
-  assert.equal(d.posts.length, 0, 'silent unless debug is on');
+  assert.equal(pitchOf(ts[1]), 2); assert.equal(pitchOf(ts[3]), 2); assert.equal(pitchOf(ts[5]), 2);
+  assert.equal(pitchOf(ts[2]), 0, 'no tag, no write'); assert.equal(pitchOf(ts[4]), 0, 'the own track is left alone');
+  assert.deepEqual(d.take(), [[2]]);
+  assert.match(d.posts.join('\n'), /carries \[PITCH\] but has no Pitch parameter/);
+  assert.equal(d.posts.length, 1);
 });
 
-test('a downbeat with nothing pending costs no Live API object at all', () => {
+test('quantize to the beat applies on any beat change; off applies at once', () => {
   const d = boot();
-  d.send('pending', 3); downbeat(d);
-  const before = d.ctx.LiveAPI.created;
-  downbeat(d); downbeat(d);
+  d.send('quantize', 1);
+  d.send('pending', 3); beat(d, 3);
+  assert.equal(pitchOf(tracks(d)[1]), 3);
+  d.send('quantize', 2);
+  d.send('pending', -5);
+  assert.equal(pitchOf(tracks(d)[1]), -5, 'no beat needed');
+  d.send('quantize', 0);
+  d.send('pending', 1); beat(d, 2);
+  assert.equal(pitchOf(tracks(d)[1]), -5, 'back on the bar: waits for beat 1');
+  beat(d, 1);
+  assert.equal(pitchOf(tracks(d)[1]), 1);
+});
+
+test('switching quantize off releases what was waiting', () => {
+  const d = boot();
+  d.send('pending', 4);
+  d.send('quantize', 2);
+  assert.equal(pitchOf(tracks(d)[1]), 4);
+});
+
+test('a beat with nothing pending costs no Live API object; the second change uses the cache', () => {
+  const d = boot();
+  d.send('pending', 3); beat(d, 1);
+  let before = d.ctx.LiveAPI.created;
+  beat(d, 2); beat(d, 1);
   assert.equal(d.ctx.LiveAPI.created, before);
-  assert.deepEqual(d.take(), [[3]], 'and nothing is re-sent');
+  before = d.ctx.LiveAPI.created;
+  d.send('pending', -1); beat(d, 1);
+  assert.equal(d.ctx.LiveAPI.created - before, 1 + 3, 'the count check plus one per target');
 });
 
-test('the second change uses the cache: one object for the count check plus one per target', () => {
-  const d = boot();
-  d.send('pending', 1); downbeat(d);
-  const before = d.ctx.LiveAPI.created;
-  d.send('pending', -1); downbeat(d);
-  assert.equal(d.ctx.LiveAPI.created - before, 1 + 4);
-  assert.equal(pitchOf(tracks(d)[1]), -1);
-});
-
-test('msg_int on inlet 1 is the downbeat; on inlet 0 it is the pending value; bang on inlet 0 is nothing', () => {
-  const d = boot();
-  d.sendOn(0, 'msg_int', 5);
-  d.sendOn(0, 'bang');
-  assert.equal(d.liveLog.length, 0);
-  d.sendOn(1, 'msg_int', 0);
-  assert.equal(pitchOf(tracks(d)[1]), 5);
-});
-
-test('current applies at once, without a downbeat', () => {
+test('current applies at once; bang on inlet 1 is a manual downbeat; bang on inlet 0 is nothing', () => {
   const d = boot();
   d.send('current', 7);
-  assert.equal(pitchOf(tracks(d)[2]), 7);
-  assert.deepEqual(d.take(), [[7]]);
+  assert.equal(pitchOf(tracks(d)[1]), 7);
+  d.send('pending', 5); d.sendOn(0, 'bang');
+  assert.equal(pitchOf(tracks(d)[1]), 7);
+  d.sendOn(1, 'bang');
+  assert.equal(pitchOf(tracks(d)[1]), 5);
 });
 
 test('rescan, a track-count change and the tracks observer each clear the cache', () => {
   const d = boot();
   d.send('current', 1);
-  assert.equal(d.ctx.LiveAPI.observers.length, 1, 'the observer exists after the first application');
-  d.send('rescan');
-  assert.equal(d.ctx.pitchTargets, null);
-  d.send('current', 2);
-  assert.equal(d.ctx.pitchTargets.length, 4);
+  assert.equal(d.ctx.LiveAPI.observers.length, 1);
+  d.send('rescan'); assert.equal(d.ctx.pitchTargets, null);
+  d.send('current', 2); assert.equal(d.ctx.pitchTargets.length, 3);
   tracks(d).push(track('Lead 1', [pitch()]));
-  d.send('current', 3);
-  assert.equal(d.ctx.pitchTargets.length, 5, 'rebuilt because the count changed');
-  tracks(d)[4].children.devices.length = 0;      // Pad 1 lost its Pitch device; same count
+  d.send('current', 3); assert.equal(d.ctx.pitchTargets.length, 4, 'rebuilt because the count changed');
+  tracks(d)[3].children.devices.length = 0;
   d.ctx.LiveAPI.notify('tracks');
   assert.equal(d.ctx.pitchTargets, null, 'the observer cleared it');
-  d.send('current', 4);
-  assert.equal(d.ctx.pitchTargets.length, 4);
+  d.send('current', 4); assert.equal(d.ctx.pitchTargets.length, 3);
 });
 
 test('a track that answers nothing is skipped; a target that disappears is reported and the rest are written', () => {
   const d = boot();
-  tracks(d)[2].name = null;
+  tracks(d)[1].children.devices[1].name = null;       // a device that answers nothing: the whole track is skipped
   d.send('current', 2);
-  assert.equal(d.ctx.pitchTargets.length, 3);
-  assert.match(d.posts.join('\n'), /scan of track 2 failed/);
-  tracks(d)[6].children.devices.length = 0;      // Vocoder's device is gone, cache still points at it
+  assert.equal(d.ctx.pitchTargets.length, 2);
+  assert.match(d.posts.join('\n'), /scan of track 1 failed/);
+  tracks(d)[5].children.devices.length = 0;
   d.posts.length = 0;
   d.send('current', 3);
   assert.match(d.posts.join('\n'), /target is gone/);
-  assert.equal(pitchOf(tracks(d)[1]), 3);
-  assert.equal(pitchOf(tracks(d)[4]), 3);
+  assert.equal(pitchOf(tracks(d)[3]), 3);
 });
 
-test('at compile time the script reads Pending and Current from the patcher', () => {
-  const live = rig();
-  const d = load('transpose-q', 'alberton-transpose-v2.js', { live, controls: { 'live.dial': 2, 'live.dial[1]': 2 } });
+test('at compile time the script reads Pending, Current and Quantize from the patcher', () => {
+  const d = boot({ controls: { 'live.dial': 2, 'live.dial[1]': 2, quantize: 1 } });
   d.Task.advance(0);
-  assert.equal(d.ctx.pendingTranspose, 2); assert.equal(d.ctx.currentTranspose, 2);
-  d.sendOn(1, 'bang');
-  assert.equal(d.liveLog.length, 0, 'pending equals current: nothing to apply after the recompile');
-  d.send('pending', 0); d.sendOn(1, 'bang');
-  assert.equal(live.live_set.children.tracks[1].children.devices[1].children.parameters[1].value, 0);
+  assert.equal(d.ctx.pendingTranspose, 2); assert.equal(d.ctx.currentTranspose, 2); assert.equal(d.ctx.quantizeMode, 1);
+  beat(d, 3);
+  assert.equal(d.liveLog.length, 0, 'pending equals current: nothing to apply');
 });
+
