@@ -129,3 +129,14 @@ test('at compile time the four settings are read from the patcher', () => {
   assert.equal(d.ctx.busNumber, 3); assert.equal(d.ctx.stripNumber, 7); assert.equal(d.ctx.actionIndex, 1); assert.equal(d.ctx.applyVolume, 0);
   assert.deepEqual(d.take(2), [['set', 'ks3']]);
 });
+
+test('the None action shows the value on Last and does nothing else', () => {
+  const d = boot();
+  d.send('action', 18);
+  d.send('prog', 1, 44);
+  assert.deepEqual(d.take(1), [[44]]);
+  assert.deepEqual(d.take(0), []);
+  assert.equal(d.liveLog.length, 0);
+  d.send('vol', 1, 0.6);
+  assert.equal(kick(d).children.mixer_device.children.volume.value, 0.6, 'the volume still applies');
+});

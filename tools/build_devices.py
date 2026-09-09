@@ -31,7 +31,7 @@ def kit_receiver():
     p.numbox("obj-last", "Last", [84, 76, 36, 15], initial=0, varname="last")
     p.comment("obj-l-action", "Action", [130, 24, 120, 14], 9.0)
     p.menu("obj-action", "Action", [130, 40, 130, 15],
-           ["Program Change", "Chain Selector"] + ["Macro %d" % n for n in range(1, 17)], varname="action")
+           ["Program Change", "Chain Selector"] + ["Macro %d" % n for n in range(1, 17)] + ["None"], varname="action")
     p.toggle("obj-applyvol", "Apply Volume", [130, 76, 15, 15], initial=1, shortname="ApplyVol", varname="applyvol")
     p.comment("obj-l-applyvol", "Apply volume", [150, 75, 110, 16], 9.0)
     # the script and what feeds it

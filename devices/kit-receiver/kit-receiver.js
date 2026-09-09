@@ -5,7 +5,8 @@
 
       prog <strip> <value>   the strip's program: sent on as a MIDI program change, or written
                              to this track's rack -- its chain selector or one of its macros --
-                             as the Action menu says
+                             as the Action menu says; or ignored when the action is None, for a
+                             track that only wants its volume from the panel
       vol <strip> <0..1>     this track's volume, when Apply Volume is on
       who                    the panel asking every receiver to introduce itself
 
@@ -66,7 +67,7 @@ var stripNumber = 1;
 var actionIndex = 0;          // 0 program change, 1 chain selector, 2.. macro (index - 1)
 var applyVolume = 1;
 
-var ACTION_PC = 0, ACTION_CHAIN = 1;
+var ACTION_PC = 0, ACTION_CHAIN = 1, ACTION_NONE = 18;   // 2..17: macro (index - 1); None: volume only
 
 function bus(v) {
     busNumber = Math.round(v);
@@ -165,6 +166,7 @@ function prog(s, value) {
     if (Math.round(s) !== stripNumber) return;
     value = Math.round(value);
     outlet(1, value);
+    if (actionIndex === ACTION_NONE) return;        // this receiver is here for the volume
     if (actionIndex === ACTION_PC) {
         outlet(0, value);
         return;
