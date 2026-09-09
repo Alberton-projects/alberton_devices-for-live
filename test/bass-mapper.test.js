@@ -43,3 +43,27 @@ test('a short list is ignored', () => {
   d.ctx.list(60);
   assert.deepEqual(d.take(), []);
 });
+
+test('low and high move the window and keep it at least an octave wide', () => {
+  const d = dev();
+  d.send('low', 48); d.send('high', 72);
+  assert.equal(d.ctx.foldToBassRange(36), 48);
+  assert.equal(d.ctx.foldToBassRange(84), 72);
+  d.send('high', 50);                       // narrower than an octave: low follows
+  assert.equal(d.ctx.BASS_LOW, 39);
+  d.send('low', 60);                        // above high: high follows
+  assert.equal(d.ctx.BASS_HIGH, 71);
+  for (let p = 0; p < 128; p++) { const q = d.ctx.foldToBassRange(p); assert.ok(q >= 60 && q <= 71 && Math.abs(q - p) % 12 === 0, `${p} -> ${q}`); }
+});
+
+test('reset and CC 120/123 release what is held', () => {
+  const d = dev();
+  d.note(72, 100); d.note(74, 100); d.take();
+  d.send('cc', 120, 0);
+  assert.deepEqual(d.take().sort(), [[60, 0], [50, 0]].sort());
+  d.note(72, 0);
+  assert.deepEqual(d.take(), []);
+  d.note(72, 100); d.take();
+  d.send('reset');
+  assert.deepEqual(d.take(), [[60, 0]]);
+});

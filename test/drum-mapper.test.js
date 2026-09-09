@@ -47,7 +47,32 @@ test('cymbals: ride, bell, crash by velocity band', () => {
   for (const p of CYMBAL_RANGE) assert.equal(d.ctx.mapCymbals(p, 100), p);
   for (let v = 1; v <= 79; v++) assert.equal(d.ctx.mapCymbals(60, v), 51);
   for (let v = 80; v <= 105; v++) assert.equal(d.ctx.mapCymbals(60, v), 53);
-  for (let v = 106; v <= 127; v++) assert.ok([49, 57].includes(d.ctx.mapCymbals(60, v)));
+  for (let v = 106; v <= 127; v++) assert.equal(d.ctx.mapCymbals(60, v), 49, 'an even pitch crashes on C#2');
+  for (let v = 106; v <= 127; v++) assert.equal(d.ctx.mapCymbals(61, v), 57, 'an odd pitch crashes on A2');
+});
+
+test('with humanize off the soft hi-hat follows pitch parity', () => {
+  const d = dev(HIHAT);
+  d.send('humanize', 0);
+  for (let i = 0; i < 20; i++) { assert.equal(d.ctx.mapHihat(60, 40), 42); assert.equal(d.ctx.mapHihat(61, 40), 44); }
+  d.send('humanize', 1);
+  const seen = new Set(); for (let i = 0; i < 200; i++) seen.add(d.ctx.mapHihat(60, 40));
+  assert.deepEqual([...seen].sort(), [42, 44], 'with humanize on both hats appear');
+});
+
+test('reset and CC 123 release every held note, then nothing is held', () => {
+  const d = dev(SNARE);
+  d.note(60, 100); d.note(62, 100); d.note(60, 90);
+  const ons = d.take().map(o => o[0]);
+  d.send('reset');
+  assert.deepEqual(d.take().map(o => o[0]).sort(), ons.slice().sort());
+  d.note(60, 0);
+  assert.deepEqual(d.take(), [], 'nothing left to release');
+  d.note(64, 100); d.take();
+  d.send('cc', 123, 0);
+  assert.equal(d.take().length, 1);
+  d.send('cc', 64, 127);
+  assert.deepEqual(d.take(), [], 'other controllers do nothing here');
 });
 
 test('note-off releases the pitch that was actually played, per held note', () => {
@@ -64,5 +89,5 @@ test('bang reports the mode without sending anything', () => {
   const d = dev(SNARE);
   d.send('bang');
   assert.deepEqual(d.take(), []);
-  assert.match(d.posts.join('\n'), /SNARE/);
+  assert.match(d.posts.join('\n'), /SNARE.*humanize on/);
 });

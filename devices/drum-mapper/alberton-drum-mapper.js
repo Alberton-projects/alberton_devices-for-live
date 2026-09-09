@@ -1,167 +1,186 @@
-// alberton-drum-mapper.js
-// Mapea cualquier nota MIDI a drums según el modo seleccionado
-// v1.1 - Si la nota ya está en el rango válido, la deja pasar sin modificar
+/*
+    Alberton Drum Mapper
+    ====================
+    Maps any MIDI note onto one drum's articulations, following the General MIDI drum
+    map, in one of four modes chosen by the Mode menu: KICK, SNARE, HIHAT, CYMBALS.
+    A note already inside that drum's range passes through unchanged; anything else is
+    mapped -- by pitch for the kick and the snare, by velocity for the hi-hat and the
+    cymbals, because on the drums *how hard* should choose the sound.
+
+    Deterministic by design: the same input gives the same drum, so a clip sounds the
+    same every night. The one exception is the hi-hat below the open-hat velocity, where
+    closed or pedal is chosen at random, like a foot that does not fall the same way
+    twice. The Humanize toggle turns that off for a reproducible render.
+
+    Notes are the only thing this script touches. Everything else -- control changes,
+    pitch bend, aftertouch, program changes -- passes through the patcher untouched.
+    CC 120 (all sound off) and CC 123 (all notes off) also release every note this
+    device has mapped, and "reset" does the same by hand.
+*/
 
 autowatch = 1;
 inlets = 1;
 outlets = 1;
 
-// Modos: 0=KICK, 1=SNARE, 2=HIHAT, 3=CYMBALS
+// Modes: 0 KICK, 1 SNARE, 2 HIHAT, 3 CYMBALS (the menu sends an int)
 var mode = 0;
+var humanizeOn = 1;   // not named like the function below: in js a var would shadow it
 
-// Rangos válidos por instrumento (notas que pasan sin modificar)
-var KICK_RANGE = [35, 36];  // B0, C1
-var SNARE_RANGE = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52];  // C#1 a E2 (articulaciones snare)
-var HIHAT_RANGE = [42, 44, 46];  // F#1, G#1, A#1
-var CYMBAL_RANGE = [49, 51, 53, 55, 57, 59];  // Crashes, rides, bells
+// General MIDI drum map. Notes already in a mode's range pass through unchanged.
+var KICK_RANGE   = [35, 36];                                     // B0, C1
+var SNARE_RANGE  = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52]; // C#1 to E2, the articulations
+var HIHAT_RANGE  = [42, 44, 46];                                 // closed, pedal, open
+var CYMBAL_RANGE = [49, 51, 53, 55, 57, 59];                     // crashes, rides, bells
 
-// Notas destino para mapeo
 var KICK_NOTES = [35, 36];
-var SNARE_NOTES_COMMON = [38, 39, 40, 41]; // Triple probabilidad
+var SNARE_NOTES_COMMON = [38, 39, 40, 41];              // three times as likely as the rare ones
 var SNARE_NOTES_RARE = [37, 43, 45, 47, 48, 50, 52];
-var HIHAT_CLOSED = 42;  // F#1
-var HIHAT_PEDAL = 44;   // G#1
-var HIHAT_OPEN = 46;    // A#1
-var CYMBAL_RIDE = 51;   // D#2
-var CYMBAL_BELL = 53;   // F2
-var CYMBAL_CRASH = [49, 57];  // C#2, A2
+var HIHAT_CLOSED = 42;   // F#1
+var HIHAT_PEDAL = 44;    // G#1
+var HIHAT_OPEN = 46;     // A#1
+var CYMBAL_RIDE = 51;    // D#2
+var CYMBAL_BELL = 53;    // F2
+var CYMBAL_CRASH = [49, 57];   // C#2, A2
 
-// Notas activas: pitch de entrada -> cola de pitches de salida.
-// Una cola, no un valor: la misma nota de entrada puede estar sonando dos
-// veces a la vez (dos fuentes en una pista, o un secuenciador retrigenado una
-// nota mantenida). Un mapa simple perdia el primer mapeo y colgaba esa nota.
-var activeNotes = {};
+// Velocity bands
+var HIHAT_OPEN_FROM = 86;    // open hat at this velocity and above
+var CYMBAL_RIDE_TO = 79;     // ride up to here
+var CYMBAL_BELL_TO = 105;    // bell up to here, crash above
 
-// Helper: comprobar si nota está en array
-function isInRange(note, rangeArray) {
-    for (var i = 0; i < rangeArray.length; i++) {
-        if (rangeArray[i] === note) return true;
-    }
-    return false;
+// Built once, not per note: the weighted snare pool and the pass-through lookups.
+var SNARE_POOL = [];
+for (var c = 0; c < SNARE_NOTES_COMMON.length; c++) {
+    SNARE_POOL.push(SNARE_NOTES_COMMON[c], SNARE_NOTES_COMMON[c], SNARE_NOTES_COMMON[c]);
+}
+for (var r = 0; r < SNARE_NOTES_RARE.length; r++) {
+    SNARE_POOL.push(SNARE_NOTES_RARE[r]);
 }
 
-// Captura modo desde live.menu (conectar directo, sin message box)
-function msg_int(v) {
-    if (v >= 0 && v <= 3) {
-        mode = v;
+function lookup(range) {
+    var set = {};
+    for (var i = 0; i < range.length; i++) set[range[i]] = true;
+    return set;
+}
+var IN_KICK = lookup(KICK_RANGE);
+var IN_SNARE = lookup(SNARE_RANGE);
+var IN_HIHAT = lookup(HIHAT_RANGE);
+var IN_CYMBAL = lookup(CYMBAL_RANGE);
+
+// --- begin shared: note-queue.js ---
+// Held notes: input pitch -> the output pitches sounding for it, oldest first.
+// A queue, not a single value: the same input pitch can sound twice at once (two
+// sources into one track, a sequencer retriggering a held note), and a plain map lost
+// the first mapping and hung that note.
+//
+// This block is the same text in every mapper; tools/sync_shared.py keeps it so.
+var heldNotes = {};
+
+function noteQueueRemember(inputPitch, outputPitch) {
+    if (heldNotes[inputPitch] === undefined) heldNotes[inputPitch] = [];
+    heldNotes[inputPitch].push(outputPitch);
+}
+
+// The output pitch to release for a note-off, or -1 when nothing is held for it.
+function noteQueueRelease(inputPitch) {
+    var queue = heldNotes[inputPitch];
+    if (queue === undefined || queue.length === 0) return -1;
+    var released = queue.shift();
+    if (queue.length === 0) delete heldNotes[inputPitch];
+    return released;
+}
+
+// Every output pitch still held, oldest first, and forget them all: what a reset or an
+// all-notes-off must release so nothing stays hanging in the instrument.
+function noteQueueFlush() {
+    var out = [];
+    for (var k in heldNotes) {
+        var queue = heldNotes[k];
+        for (var i = 0; i < queue.length; i++) out.push(queue[i]);
     }
+    heldNotes = {};
+    return out;
+}
+// --- end shared: note-queue.js ---
+
+// The Mode menu, connected straight to the script
+function msg_int(v) {
+    if (v >= 0 && v <= 3) mode = v;
+}
+
+// humanize <0|1>, from the Humanize toggle
+function humanize(v) {
+    humanizeOn = v ? 1 : 0;
 }
 
 function list() {
     if (arguments.length < 2) return;
-    
+
     var inputPitch = Math.floor(arguments[0]);
     var vel = Math.floor(arguments[1]);
-    
-    var outputPitch;
-    
-    // Note OFF - usar nota almacenada
+
     if (vel === 0) {
-        var queue = activeNotes[inputPitch];
-        if (queue !== undefined && queue.length > 0) {
-            outputPitch = queue.shift();
-            if (queue.length === 0) delete activeNotes[inputPitch];
-            outlet(0, [outputPitch, 0]);
-        }
+        var released = noteQueueRelease(inputPitch);
+        if (released >= 0) outlet(0, [released, 0]);
         return;
     }
-    
-    // Note ON - calcular nota destino
+
+    var outputPitch;
     switch (mode) {
-        case 0: // KICK
-            outputPitch = mapKick(inputPitch);
-            break;
-        case 1: // SNARE
-            outputPitch = mapSnare(inputPitch);
-            break;
-        case 2: // HIHAT
-            outputPitch = mapHihat(inputPitch, vel);
-            break;
-        case 3: // CYMBALS
-            outputPitch = mapCymbals(inputPitch, vel);
-            break;
-        default:
-            outputPitch = inputPitch;
+        case 0:  outputPitch = mapKick(inputPitch); break;
+        case 1:  outputPitch = mapSnare(inputPitch); break;
+        case 2:  outputPitch = mapHihat(inputPitch, vel); break;
+        case 3:  outputPitch = mapCymbals(inputPitch, vel); break;
+        default: outputPitch = inputPitch;
     }
-    
-    // Almacenar mapeo para note-off
-    if (activeNotes[inputPitch] === undefined) activeNotes[inputPitch] = [];
-    activeNotes[inputPitch].push(outputPitch);
-    
+
+    noteQueueRemember(inputPitch, outputPitch);
     outlet(0, [outputPitch, vel]);
 }
 
 function mapKick(inputPitch) {
-    // Si ya está en rango válido, dejar pasar
-    if (isInRange(inputPitch, KICK_RANGE)) {
-        return inputPitch;
-    }
-    // Fold a rango 35-36 (B0-C1)
-    var idx = inputPitch % KICK_NOTES.length;
-    return KICK_NOTES[idx];
+    if (IN_KICK[inputPitch]) return inputPitch;
+    return KICK_NOTES[inputPitch % KICK_NOTES.length];
 }
 
+// The pitch picks the articulation, so a key always gives the same snare sound.
 function mapSnare(inputPitch) {
-    // Si ya está en rango válido, dejar pasar
-    if (isInRange(inputPitch, SNARE_RANGE)) {
-        return inputPitch;
-    }
-    
-    // COMMON (38,39,40,41) tienen triple probabilidad
-    // Pool: 38x3, 39x3, 40x3, 41x3, 37, 43, 45, 47, 48, 50, 52
-    var pool = [];
-    for (var i = 0; i < SNARE_NOTES_COMMON.length; i++) {
-        pool.push(SNARE_NOTES_COMMON[i]);
-        pool.push(SNARE_NOTES_COMMON[i]);
-        pool.push(SNARE_NOTES_COMMON[i]); // Triple
-    }
-    for (var j = 0; j < SNARE_NOTES_RARE.length; j++) {
-        pool.push(SNARE_NOTES_RARE[j]);
-    }
-    
-    // Usar input pitch como seed para pseudo-random consistente
-    var idx = inputPitch % pool.length;
-    return pool[idx];
+    if (IN_SNARE[inputPitch]) return inputPitch;
+    return SNARE_POOL[inputPitch % SNARE_POOL.length];
 }
 
+// Hard hits open the hat. Softer ones are closed or pedal: at random while Humanize is
+// on, by pitch parity when it is off.
 function mapHihat(inputPitch, velocity) {
-    // Si ya está en rango válido, dejar pasar
-    if (isInRange(inputPitch, HIHAT_RANGE)) {
-        return inputPitch;
-    }
-    
-    // Velocity 86-127: Open Hi-Hat
-    if (velocity >= 86) {
-        return HIHAT_OPEN;
-    }
-    // Velocity 1-85: Random entre Closed y Pedal
-    var options = [HIHAT_CLOSED, HIHAT_PEDAL];
-    var idx = Math.floor(Math.random() * options.length);
-    return options[idx];
+    if (IN_HIHAT[inputPitch]) return inputPitch;
+    if (velocity >= HIHAT_OPEN_FROM) return HIHAT_OPEN;
+    if (humanizeOn) return Math.random() < 0.5 ? HIHAT_CLOSED : HIHAT_PEDAL;
+    return (inputPitch % 2 === 0) ? HIHAT_CLOSED : HIHAT_PEDAL;
 }
 
+// Soft is ride, medium is bell, hard is a crash; which crash follows the pitch.
 function mapCymbals(inputPitch, velocity) {
-    // Si ya está en rango válido, dejar pasar
-    if (isInRange(inputPitch, CYMBAL_RANGE)) {
-        return inputPitch;
-    }
-    
-    // Velocity 1-79: Ride
-    if (velocity <= 79) {
-        return CYMBAL_RIDE;
-    }
-    // Velocity 80-105: Bell
-    if (velocity <= 105) {
-        return CYMBAL_BELL;
-    }
-    // Velocity 106-127: Random crash
-    var idx = Math.floor(Math.random() * CYMBAL_CRASH.length);
-    return CYMBAL_CRASH[idx];
+    if (IN_CYMBAL[inputPitch]) return inputPitch;
+    if (velocity <= CYMBAL_RIDE_TO) return CYMBAL_RIDE;
+    if (velocity <= CYMBAL_BELL_TO) return CYMBAL_BELL;
+    return CYMBAL_CRASH[inputPitch % CYMBAL_CRASH.length];
+}
+
+// cc <number> <value>, from the patcher: all sound off and all notes off release
+// everything this device is holding, so nothing stays hanging in the instrument.
+function cc(number, value) {
+    if (number === 120 || number === 123) releaseAll();
+}
+
+function reset() {
+    releaseAll();
+}
+
+function releaseAll() {
+    var held = noteQueueFlush();
+    for (var i = 0; i < held.length; i++) outlet(0, [held[i], 0]);
 }
 
 function bang() {
     var modeNames = ["KICK", "SNARE", "HIHAT", "CYMBALS"];
-    post("Drum Mapper v1.1 mode: " + modeNames[mode] + "\n");
-    post("  - Notes in valid range pass through unchanged\n");
-    post("  - Notes outside range are mapped by velocity\n");
+    post("Drum Mapper: mode " + modeNames[mode] + ", humanize " + (humanizeOn ? "on" : "off") + "\n");
 }
