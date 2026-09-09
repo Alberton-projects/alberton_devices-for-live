@@ -157,6 +157,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   alone. `Track.insert_device` and `Chain.insert_device` accept Live's own device names but
   not a Max for Live device, and the browser loads at the selected position on the track, so
   putting a device inside a rack chain over the LOM is not possible: it is a drag in Live.
+- **V5 design check 2 passed too**, once the owner had dragged the FX receiver into the
+  rack's chain: `this_device canonical_parent canonical_parent` is the rack, and the receiver
+  wrote 52..59 into Macro 1..8 from inside; on the track the same path is the Song, which has
+  no `class_name`, so a receiver must refuse to write unless its parent is a rack. After the
+  drag the receiver's strip dial read 16 instead of 1, most likely a touch while dragging; a
+  receiver should show its strip large and plain. The three throwaway devices are gone from
+  the User Library; `test/live/build_v5_checks.py` rebuilds them.
 
 ## Not yet verified
 

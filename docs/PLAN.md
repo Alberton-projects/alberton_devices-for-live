@@ -166,8 +166,10 @@ repository created from the working folder with its history, first push.
   owner's 32 kits: export from V4.3 with `pattrstorage write`, rename the keys, read into V5.
 - **Names.** `Alberton Kit Selector` (V5), `Alberton Kit Receiver`, `Alberton Kit FX Receiver`.
 
-To check in Live before building, each a five-minute test: a `send`/`route` across two devices; a
-LOM write to the parent rack from inside a chain; `pattrstorage` subscribe mode next to `autopattr`.
+**Checked in Live on 2026-09-09, all three passed** (`docs/HANDOFF.md`): one `send` per bus with the
+strip filtered in the receiver; a LOM write to the parent rack from inside a chain, which must refuse
+to write when the parent is not a rack; `pattrstorage` subscribe mode next to `autopattr`. One
+limit found: a Max for Live device cannot be placed inside a rack chain over the LOM, only by hand.
 
 ## 4. The Gamepad track-selection bug, diagnosed
 
