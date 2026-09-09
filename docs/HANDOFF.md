@@ -132,9 +132,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   keeper and `prepend restore` feeding it back; no `live.*` object and no js parameter needed. The pad fired clips and scenes on the chosen
   track the same evening: Phase 1 is complete on every device.
 
+- **Transpose Q, Phase 2, on the live set.** Driven over MCP with the Main muted: with Quantize
+  on the bar, Pending 2 reached the same nine `[PITCH]` devices found by the tag alone, on the
+  bar line; with Quantize off and the transport stopped, Pending 0 and then 20 were applied at
+  once, Current following; the dials accept ±24. The Live parameter list reads Current, Pend,
+  Quant.
+
 ## Not yet verified
 
-- Transpose Q after Phase 2: the tag rule on the set (the same nine devices), Quantize on the
-  beat and off, the ±24 range.
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

@@ -18,7 +18,7 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.3 Transpose Q coded and installed, verification pending. Phase 1 complete and verified on every device, pad included |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters and 2.4 Kit Selector V5 open. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
@@ -27,6 +27,8 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-09** — Transpose Q Phase 2 verified on the set (HANDOFF): tag rule, Quantize off,
+  ±24.
 - **2026-09-09** — Pad firing verified by the owner. Transpose Q generalised (`36cde01`): targets
   by the `[PITCH]` tag on any track but its own, Quantize menu (bar, beat, off), ±24, the script
   renamed `alberton-transpose-q.js`. 51 tests. Installed in development form.
