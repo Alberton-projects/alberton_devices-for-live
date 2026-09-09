@@ -105,7 +105,7 @@ after a save. Development form only during a work session; release form before a
 ### Phase 2 — generalisation
 
 - **Bass Mapper** — **done 2026-09-09**: `Low` and `High` as `live.numbox` parameters (defaults C1 36 and C3 60), shown as note names.
-- **Drum Mapper**: the target notes as parameters with their GM defaults (kick, side stick,
+- **Drum Mapper** — **code done 2026-09-09, verification pending**: the target notes as parameters with their GM defaults (kick, side stick,
   snares, clap, closed/pedal/open hat, ride, bell, crash 1 and 2), since a mode passes through
   exactly the notes it targets; velocity thresholds as parameters (open hi-hat from 86; ride
   to 79, bell to 105, crash above); GM drum map documented. `Humanize` is done (Phase 1).

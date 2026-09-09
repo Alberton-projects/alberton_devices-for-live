@@ -112,3 +112,31 @@ test('at compile time the script reads Mode and Humanize from the patcher', () =
   assert.equal(plain.ctx.mode, 0, 'no controls, no change, no error');
   assert.equal(plain.posts.length, 0);
 });
+
+test('a note parameter re-targets its mode at once; a threshold moves its band', () => {
+  const d = dev(CYMBALS);
+  d.send('crash2', 55);
+  assert.equal(d.ctx.mapCymbals(61, 120), 55, 'odd pitches crash on the new note');
+  assert.equal(d.ctx.mapCymbals(55, 40), 55, 'and it passes through now');
+  assert.equal(d.ctx.mapCymbals(57, 40), 51, 'while the old one no longer does');
+  d.send('bellto', 90);
+  assert.equal(d.ctx.mapCymbals(60, 100), 49, 'velocity 100 is a crash once the bell band ends at 90');
+  const h = dev(HIHAT);
+  h.send('openfrom', 127); h.send('humanize', 0);
+  assert.equal(h.ctx.mapHihat(60, 120), 42, 'nothing opens the hat below 127');
+  h.send('hhopen', 40);
+  assert.equal(h.ctx.mapHihat(60, 127), 40);
+  const s = dev(SNARE);
+  s.send('snare1', 34); s.send('stick', 33);
+  for (let p = 60; p < 90; p++) assert.ok([34, 40, 33, 39].includes(s.ctx.mapSnare(p)));
+  assert.equal(s.ctx.mapSnare(38), s.ctx.mapSnare(38), 'the old snare note is mapped now, deterministically');
+  assert.ok([34, 40, 33, 39].includes(s.ctx.mapSnare(38)));
+});
+
+test('at compile time the sixteen dials are read back too', () => {
+  const d = load('drum-mapper', 'alberton-drum-mapper.js', { controls: { 'live.menu': 3, humanize: 1, crash1: 50, crash2: 52, ride: 51, bell: 53, rideto: 60, bellto: 100, openfrom: 90 } });
+  d.Task.advance(0);
+  assert.equal(d.ctx.mapCymbals(60, 127), 50);
+  assert.equal(d.ctx.mapCymbals(60, 70), 53, 'ride ends at 60 now');
+  assert.equal(d.ctx.HIHAT_OPEN_FROM, 90);
+});
