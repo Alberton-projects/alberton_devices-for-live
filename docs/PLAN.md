@@ -97,7 +97,7 @@ after a save. Development form only during a work session; release form before a
 | Device | Change | How it is verified |
 |---|---|---|
 | Kit Selector V4.3 — **done 2026-09-09** | `try/catch` around every LiveAPI use; a `DEBUG` flag in front of every `post()`; cache the drum-chain parameter paths at `refresh` | recall a kit on the set, read the four "Chain Selector" macros and the volumes over MCP |
-| Gamepad — **done 2026-09-09, reopen verified; pad firing pending** | `fire_slot` uses the known index: one LiveAPI object per fire. Track selection owned by the script and saved with the set (see §4). Comment on `tracks.length / 2` | fire a slot from the pad, watch `playing_slot` over MCP; reopen the set, the menu shows the same track |
+| Gamepad — **done 2026-09-09, verified with the pad** | `fire_slot` uses the known index: one LiveAPI object per fire. Track selection owned by the script and saved with the set (see §4). Comment on `tracks.length / 2` | fire a slot from the pad, watch `playing_slot` over MCP; reopen the set, the menu shows the same track |
 | Transpose Q — **done 2026-09-09** | `try/catch`; `DEBUG` flag; a LiveAPI observer on `live_set tracks` clears the cache; `bang` and `msg_int` unified; the display dial made visible as `Current`, −12..12 | set Pending, wait for the downbeat, read the nine `[PITCH]` values over MCP, restore 0 |
 | Mappers — **done 2026-09-09, verified with sound** | pass every non-note MIDI message through (today only notes survive the mapper, so no sustain or pitch bend reaches the Fretless Bass); `note-queue.js` shared by text with `reset` and CC 123 all-notes-off; pool built once; `isInRange` by lookup; cymbals deterministic, hi-hat random with the reason in a comment; the Transpose Q display dial gets the range −12..12 | Node tests on every mapping function (characterisation tests written first, `npm test`); a held-note and a pedal test in Live |
 | All | comments in English | — |
@@ -109,7 +109,7 @@ after a save. Development form only during a work session; release form before a
   snares, clap, closed/pedal/open hat, ride, bell, crash 1 and 2), since a mode passes through
   exactly the notes it targets; velocity thresholds as parameters (open hi-hat from 86; ride
   to 79, bell to 105, crash above); GM drum map documented. `Humanize` is done (Phase 1).
-- **Transpose Q**: target every Pitch device (`MidiPitcher`) whose name carries the tag `[PITCH]`,
+- **Transpose Q** — **code done 2026-09-09, verification pending**: target every device whose name carries the tag `[PITCH]`,
   on any track but its own — a documented convention: rename a Pitch device to opt a track in. Add
   `Quantize` (Bar / Beat / Immediate) and a `Range` of ±24. No track names anywhere.
 - **Kit Selector V5.0 + Kit Receiver**: the redesign in §3, FX still by group name.

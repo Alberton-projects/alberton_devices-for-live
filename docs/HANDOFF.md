@@ -129,10 +129,12 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 - **A bare `pattr @parameter_enable 1` keeps a symbol with the set.** Verified 2026-09-09 on
   the Gamepad: the track chosen on the menu before closing the set was back after reopening.
   So a script can own a piece of state by name and have Live save it, with a `pattr` as the
-  keeper and `prepend restore` feeding it back; no `live.*` object and no js parameter needed.
+  keeper and `prepend restore` feeding it back; no `live.*` object and no js parameter needed. The pad fired clips and scenes on the chosen
+  track the same evening: Phase 1 is complete on every device.
 
 ## Not yet verified
 
-- The Gamepad firing from the pad on the chosen track, and the scenes (needs the pad).
+- Transpose Q after Phase 2: the tag rule on the set (the same nine devices), Quantize on the
+  beat and off, the ±24 range.
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
