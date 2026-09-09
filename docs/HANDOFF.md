@@ -138,6 +138,12 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   once, Current following; the dials accept ±24. The Live parameter list reads Current, Pend,
   Quant.
 
+- **Drum Mapper, Phase 2, on the live set.** After the reload every instance listed its
+  nineteen parameters at the GM defaults with Mode and Humanize intact (no rename this time).
+  With Open Hat From set to 127 over MCP, hard hi-hat hits stayed closed or pedal; the owner
+  moved Crash 2 and a hard odd-key hit followed it. So the dials reach the script live, through
+  their prepends, and the compile-time read-back covers them.
+
 ## Not yet verified
 
 
