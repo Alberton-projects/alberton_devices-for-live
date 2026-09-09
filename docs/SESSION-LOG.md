@@ -18,15 +18,19 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 1, safety and speed (`docs/PLAN.md` §2): 1.1 Kit Selector and 1.3 Transpose Q done and verified in Live; 1.2 Gamepad and 1.4 mappers open |
+| Phase | 1, safety and speed (`docs/PLAN.md` §2): 1.1 Kit Selector and 1.3 Transpose Q done and verified in Live; 1.4 mappers done, awaiting the test with sound; 1.2 Gamepad open |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q` and `kit-selector` in development form (plain device, script symlinked from here); every other device in release form |
+| Installed form | `transpose-q`, `kit-selector`, `bass-mapper` and `drum-mapper` in development form (plain device, script symlinked from here); the Receiver, the Gamepad and the Tempo Automator in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-09** — Mappers rewritten for Phase 1 (`1628c31`): shared note queue with `reset`
+  and CC 120/123, every non-note message passed through, crash by pitch, hi-hat randomness
+  behind a Humanize toggle, Low/High on the Bass Mapper, the drum menu named Mode. 37 tests.
+  Installed in development form; the test with sound is still to do.
 - **2026-09-09** — Transpose Q script rewritten for Phase 1 (`028025e`): guards, observer on
   the track list, silent downbeat; the applied value gets a visible `Current` dial, −12..12
   (`9fbf0ca`, `d9a06ea`). 33 tests. Verified on the set: nine `[PITCH]` devices follow

@@ -81,6 +81,15 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   that order: renaming the dial changed the order of the device's parameters, which anything
   addressing them by index must know.
 
+- **Renaming a Live parameter in the patcher** (the Drum Mapper's menu `live.menu` → `Mode`,
+  the Transpose Q dial → `Current`) is done in two places: the box's `valueof` and the
+  patcher's root `parameters` table, which Max keeps as a cache of names. Whether Live restores
+  a saved value under the new name is checked at the next reload of the set (the four drum
+  Modes were 0, 1, 2, 3 before).
+
 ## Not yet verified
+
+- The mappers with sound: a held and retriggered note, the sustain pedal through the Bass
+  Mapper, CC 123 releasing what is held, the four Modes after the rename.
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
