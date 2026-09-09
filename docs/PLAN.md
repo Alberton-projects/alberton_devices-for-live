@@ -105,9 +105,10 @@ after a save. Development form only during a work session; release form before a
 ### Phase 2 — generalisation
 
 - **Bass Mapper**: `Low` and `High` as `live.numbox` parameters (defaults C1 36 and C3 60).
-- **Drum Mapper**: velocity thresholds as parameters (open hi-hat from 86; ride to 79, bell to 105,
-  crash above); GM drum map documented; `Humanize` toggle, on by default, that switches the
-  hi-hat closed/pedal randomness off for reproducible renders.
+- **Drum Mapper**: the target notes as parameters with their GM defaults (kick, side stick,
+  snares, clap, closed/pedal/open hat, ride, bell, crash 1 and 2), since a mode passes through
+  exactly the notes it targets; velocity thresholds as parameters (open hi-hat from 86; ride
+  to 79, bell to 105, crash above); GM drum map documented. `Humanize` is done (Phase 1).
 - **Transpose Q**: target every Pitch device (`MidiPitcher`) whose name carries the tag `[PITCH]`,
   on any track but its own — a documented convention: rename a Pitch device to opt a track in. Add
   `Quantize` (Bar / Beat / Immediate) and a `Range` of ±24. No track names anywhere.

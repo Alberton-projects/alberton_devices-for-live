@@ -1,11 +1,13 @@
 /*
     Alberton Drum Mapper
     ====================
-    Maps any MIDI note onto one drum's articulations, following the General MIDI drum
-    map, in one of four modes chosen by the Mode menu: KICK, SNARE, HIHAT, CYMBALS.
-    A note already inside that drum's range passes through unchanged; anything else is
-    mapped -- by pitch for the kick and the snare, by velocity for the hi-hat and the
-    cymbals, because on the drums *how hard* should choose the sound.
+    Maps any MIDI note onto one drum's sounds, following the General MIDI drum map, in
+    one of four modes chosen by the Mode menu: KICK, SNARE, HIHAT, CYMBALS. A note that
+    names one of the mode's own sounds passes through unchanged -- so nothing is ever sent
+    to a pad the mode does not target, and a kit needs only those pads. Anything else is
+    mapped: by pitch for the kick and the snare, by velocity for the hi-hat and the
+    cymbals, because on the drums *how hard* should choose the sound. In SNARE mode the
+    six General MIDI toms also pass through, by exact note only.
 
     Deterministic by design: the same input gives the same drum, so a clip sounds the
     same every night. The one exception is the hi-hat below the open-hat velocity, where
@@ -26,21 +28,23 @@ outlets = 1;
 var mode = 0;
 var humanizeOn = 1;   // not named like the function below: in js a var would shadow it
 
-// General MIDI drum map. Notes already in a mode's range pass through unchanged.
-var KICK_RANGE   = [35, 36];                                     // B0, C1
-var SNARE_RANGE  = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52]; // C#1 to E2, the articulations
-var HIHAT_RANGE  = [42, 44, 46];                                 // closed, pedal, open
-var CYMBAL_RANGE = [49, 51, 53, 55, 57, 59];                     // crashes, rides, bells
-
-var KICK_NOTES = [35, 36];
-var SNARE_NOTES_COMMON = [38, 39, 40, 41];              // three times as likely as the rare ones
-var SNARE_NOTES_RARE = [37, 43, 45, 47, 48, 50, 52];
+// General MIDI drum map. A mode's own sounds pass through unchanged; the rest is mapped
+// onto them, so a kit needs pads only at these notes.
+var KICK_NOTES = [35, 36];                     // acoustic bass drum, bass drum 1
+var SNARE_NOTES_COMMON = [38, 40];             // acoustic snare, electric snare: three times as likely
+var SNARE_NOTES_RARE = [37, 39];               // side stick, hand clap
+var TOM_NOTES = [41, 43, 45, 47, 48, 50];      // pass through in SNARE mode, by exact note only
 var HIHAT_CLOSED = 42;   // F#1
 var HIHAT_PEDAL = 44;    // G#1
 var HIHAT_OPEN = 46;     // A#1
-var CYMBAL_RIDE = 51;    // D#2
-var CYMBAL_BELL = 53;    // F2
-var CYMBAL_CRASH = [49, 57];   // C#2, A2
+var CYMBAL_RIDE = 51;    // D#2, ride cymbal 1
+var CYMBAL_BELL = 53;    // F2, ride bell
+var CYMBAL_CRASH = [49, 57];   // C#2 crash 1, A2 crash 2
+
+var KICK_RANGE   = KICK_NOTES;
+var SNARE_RANGE  = SNARE_NOTES_COMMON.concat(SNARE_NOTES_RARE, TOM_NOTES);
+var HIHAT_RANGE  = [HIHAT_CLOSED, HIHAT_PEDAL, HIHAT_OPEN];
+var CYMBAL_RANGE = [CYMBAL_CRASH[0], CYMBAL_RIDE, CYMBAL_BELL, CYMBAL_CRASH[1]];
 
 // Velocity bands
 var HIHAT_OPEN_FROM = 86;    // open hat at this velocity and above
@@ -142,7 +146,8 @@ function mapKick(inputPitch) {
     return KICK_NOTES[inputPitch % KICK_NOTES.length];
 }
 
-// The pitch picks the articulation, so a key always gives the same snare sound.
+// The pitch picks the sound, so a key always gives the same snare sound; toms pass only
+// when the note is exactly theirs.
 function mapSnare(inputPitch) {
     if (IN_SNARE[inputPitch]) return inputPitch;
     return SNARE_POOL[inputPitch % SNARE_POOL.length];

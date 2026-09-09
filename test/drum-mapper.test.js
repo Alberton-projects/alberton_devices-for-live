@@ -5,9 +5,10 @@ const { load } = require('./max-stub');
 
 const dev = (mode) => { const d = load('drum-mapper', 'alberton-drum-mapper.js'); if (mode !== undefined) d.send('msg_int', mode); return d; };
 const KICK = 0, SNARE = 1, HIHAT = 2, CYMBALS = 3;
-const SNARE_RANGE = [37, 38, 39, 40, 41, 43, 45, 47, 48, 50, 52];
+const SNARE_SOUNDS = [37, 38, 39, 40];
+const TOMS = [41, 43, 45, 47, 48, 50];
 const HIHAT_RANGE = [42, 44, 46];
-const CYMBAL_RANGE = [49, 51, 53, 55, 57, 59];
+const CYMBAL_RANGE = [49, 51, 53, 57];
 
 test('the mode menu selects the map; out-of-range values are ignored', () => {
   const d = dev();
@@ -25,14 +26,20 @@ test('kick: B0 and C1 pass, everything else lands on one of them', () => {
   }
 });
 
-test('snare: articulations pass, the rest map deterministically by pitch', () => {
+test('snare: the GM snare sounds and the toms pass, everything else maps onto a snare sound by pitch', () => {
   const d = dev(SNARE);
-  for (const p of SNARE_RANGE) assert.equal(d.ctx.mapSnare(p), p);
+  for (const p of SNARE_SOUNDS.concat(TOMS)) assert.equal(d.ctx.mapSnare(p), p);
+  const hits = {};
   for (let p = 0; p < 128; p++) {
+    if (SNARE_SOUNDS.includes(p) || TOMS.includes(p)) continue;
     const q = d.ctx.mapSnare(p);
-    assert.ok(SNARE_RANGE.includes(q), `${p} -> ${q}`);
+    assert.ok(SNARE_SOUNDS.includes(q), `${p} -> ${q} is not a snare sound`);
     assert.equal(d.ctx.mapSnare(p), q, 'same pitch, same snare');
+    hits[q] = (hits[q] || 0) + 1;
   }
+  assert.ok(hits[38] > 2 * hits[37] && hits[40] > 2 * hits[39], 'snares are about three times as likely as stick and clap');
+  assert.equal(d.ctx.mapSnare(52), d.ctx.mapSnare(52), 'a China note is mapped, not passed');
+  assert.ok(SNARE_SOUNDS.includes(d.ctx.mapSnare(52)));
 });
 
 test('hi-hat: open above velocity 85, closed or pedal below', () => {
@@ -45,6 +52,8 @@ test('hi-hat: open above velocity 85, closed or pedal below', () => {
 test('cymbals: ride, bell, crash by velocity band', () => {
   const d = dev(CYMBALS);
   for (const p of CYMBAL_RANGE) assert.equal(d.ctx.mapCymbals(p, 100), p);
+  assert.equal(d.ctx.mapCymbals(55, 40), 51, 'splash and ride 2 are no longer passed to a pad that may be empty');
+  assert.equal(d.ctx.mapCymbals(59, 90), 53);
   for (let v = 1; v <= 79; v++) assert.equal(d.ctx.mapCymbals(60, v), 51);
   for (let v = 80; v <= 105; v++) assert.equal(d.ctx.mapCymbals(60, v), 53);
   for (let v = 106; v <= 127; v++) assert.equal(d.ctx.mapCymbals(60, v), 49, 'an even pitch crashes on C#2');

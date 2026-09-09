@@ -89,6 +89,19 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   state in someone's set keeps its name, or the release notes say what to set again. The
   Humanize toggle, new, came up at its initial value 1 on all four, as intended.
 
+- **The Drum Mapper's targets are General MIDI, the kits are not always.** Read over the
+  bridge socket on 2026-09-09: of the ten kits in the DRUMS Selector, six Daft Punk kits and
+  the Simmons kit carry exactly Crash 1 (49), Ride 1 (51), Ride Bell (53) and Crash 2 (57);
+  Yellow Kit lacks 53 and 57; Latin Pop and Basic Beat Box are not drum kits in that zone. No
+  kit has Splash (55), Ride 2 (59) or China (52), and the old snare pool sent hits to 47, 48,
+  50 and 52, empty almost everywhere. Hence the rule now in the script: **a mode passes
+  through only the notes it targets itself**, and in SNARE mode the six GM toms by exact
+  note, so nothing is ever sent to a pad the mode does not target and a kit needs only
+  those pads. The snare pool is the four GM snare sounds, snares three times as likely as
+  side stick and clap. The kit-side gaps (Yellow Kit) are the owner's to fill or not. The
+  full pad map is in the MCP working directory, `_handoff-devices/kits-drums-2026-09-09.md`,
+  because it describes the set, not the devices.
+
 ## Not yet verified
 
 - The mappers with sound: a held and retriggered note, the sustain pedal through the Bass
