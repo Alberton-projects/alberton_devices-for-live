@@ -107,6 +107,8 @@ function load(device, script, opts = {}) {
     outlet: (i, ...a) => out.push({ index: i, args: Array.from(a.length === 1 && Array.isArray(a[0]) ? a[0] : a) }),
     arrayfromargs: (args) => Array.prototype.slice.call(args),
     Task: FakeTask,
+    // patcher.getnamed(varname).getvalueof(): the controls a test declares in opts.controls
+    patcher: { getnamed: (name) => (opts.controls && name in opts.controls) ? { getvalueof: () => opts.controls[name] } : null },
     LiveAPI: makeLiveAPI(opts.live || {}, liveLog, posts),
     Math, parseInt, parseFloat, String, Number, Array, Object, isNaN,
   };

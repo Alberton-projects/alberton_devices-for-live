@@ -228,3 +228,12 @@ test('a track that disappears between refresh and recall does not stop the recal
   assert.equal(volumeOf(byName(d.live, 'Snare')), 0.70);
   assert.ok(d.take().some(o => o[0] === 'sent_all'));
 });
+
+test('at compile time the script reads the twelve dials without writing anything', () => {
+  const live = rig();
+  const d = load('kit-selector', 'live_controller.js', { live, controls: { dial_kick: 5, dial_bass_synth: 9, dial_lead2: 3 } });
+  d.Task.advance(0);
+  assert.equal(d.ctx.currentValues.kick, 5); assert.equal(d.ctx.currentValues.bass_synth, 9); assert.equal(d.ctx.currentValues.lead2, 3);
+  assert.equal(d.ctx.currentValues.snare, 0);
+  assert.equal(d.liveLog.length, 0); assert.deepEqual(d.take(), []);
+});

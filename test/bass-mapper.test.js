@@ -67,3 +67,10 @@ test('reset and CC 120/123 release what is held', () => {
   d.send('reset');
   assert.deepEqual(d.take(), [[60, 0]]);
 });
+
+test('at compile time the script reads Low and High from the patcher', () => {
+  const d = load('bass-mapper', 'alberton-bass-mapper.js', { controls: { low: 40, high: 64 } });
+  d.Task.advance(0);
+  assert.equal(d.ctx.BASS_LOW, 40); assert.equal(d.ctx.BASS_HIGH, 64);
+  assert.equal(d.ctx.foldToBassRange(36), 48);
+});

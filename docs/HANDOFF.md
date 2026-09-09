@@ -102,6 +102,14 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   full pad map is in the MCP working directory, `_handoff-devices/kits-drums-2026-09-09.md`,
   because it describes the set, not the devices.
 
+- **A recompile really does lose the controls.** Saving the Drum Mapper script while the set
+  was open recompiled all four instances and every one behaved as KICK: `mode` was back at 0
+  and the Mode menus, still showing 1, 2 and 3, had not sent their values again. Fixed by
+  nudging the three menus over MCP, and for good in every script: a Task scheduled at compile
+  time reads the patcher's controls with `patcher.getnamed(varname).getvalueof()` (Mode and
+  Humanize, Low and High, Pending and Current, the twelve Kit Selector dials), so a recompile
+  restores the state it just lost. Harmless at a normal load.
+
 ## Not yet verified
 
 - The mappers with sound: a held and retriggered note, the sustain pedal through the Bass

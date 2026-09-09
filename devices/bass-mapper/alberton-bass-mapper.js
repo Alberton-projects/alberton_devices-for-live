@@ -107,6 +107,25 @@ function releaseAll() {
     for (var i = 0; i < held.length; i++) outlet(0, [held[i], 0]);
 }
 
+// After a recompile (autowatch, while developing) every var above is back at its initial
+// value, but the patcher's controls do not send theirs again. So read them: patcher
+// objects answer getvalueof() with what they show. Harmless at a normal load, where the
+// controls send their values anyway.
+function syncFromPatcher() {
+    try {
+        var lo = patcher.getnamed("low"), hi = patcher.getnamed("high");
+        if (lo && hi) {
+            BASS_LOW = Math.round(lo.getvalueof());
+            BASS_HIGH = Math.round(hi.getvalueof());
+            if (BASS_HIGH < BASS_LOW + 11) BASS_HIGH = BASS_LOW + 11;
+        }
+    } catch (e) {
+        post("Bass Mapper: could not read the patcher's controls: " + e + "\n");
+    }
+}
+var syncTask = new Task(syncFromPatcher, this);
+syncTask.schedule(0);
+
 function bang() {
     post("Bass Mapper: " + BASS_LOW + "-" + BASS_HIGH + "\n");
 }

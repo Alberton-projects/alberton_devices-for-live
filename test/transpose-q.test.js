@@ -105,3 +105,14 @@ test('a track that answers nothing is skipped; a target that disappears is repor
   assert.equal(pitchOf(tracks(d)[1]), 3);
   assert.equal(pitchOf(tracks(d)[4]), 3);
 });
+
+test('at compile time the script reads Pending and Current from the patcher', () => {
+  const live = rig();
+  const d = load('transpose-q', 'alberton-transpose-v2.js', { live, controls: { 'live.dial': 2, 'live.dial[1]': 2 } });
+  d.Task.advance(0);
+  assert.equal(d.ctx.pendingTranspose, 2); assert.equal(d.ctx.currentTranspose, 2);
+  d.sendOn(1, 'bang');
+  assert.equal(d.liveLog.length, 0, 'pending equals current: nothing to apply after the recompile');
+  d.send('pending', 0); d.sendOn(1, 'bang');
+  assert.equal(live.live_set.children.tracks[1].children.devices[1].children.parameters[1].value, 0);
+});

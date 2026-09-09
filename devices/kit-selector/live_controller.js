@@ -508,6 +508,23 @@ function piano2(v)        { dial("piano2", v); }
 function lead1(v)         { dial("lead1", v); }
 function lead2(v)         { dial("lead2", v); }
 
+// After a recompile (autowatch, while developing) currentValues is back at its initial
+// value, but the patcher's controls do not send theirs again. So read them: patcher
+// objects answer getvalueof() with what they show. Harmless at a normal load, where the
+// controls send their values anyway.
+function syncFromPatcher() {
+    try {
+        for (var key in currentValues) {
+            var dial = patcher.getnamed("dial_" + key);
+            if (dial) currentValues[key] = Math.round(dial.getvalueof());
+        }
+    } catch (e) {
+        warn("could not read the patcher's dials: " + e);
+    }
+}
+var syncTask = new Task(syncFromPatcher, this);
+syncTask.schedule(0);
+
 // ============ SEND ALL (after every kit recall, and the Send button) ============
 
 function sendAll() {

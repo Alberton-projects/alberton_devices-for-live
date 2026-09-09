@@ -100,3 +100,15 @@ test('bang reports the mode without sending anything', () => {
   assert.deepEqual(d.take(), []);
   assert.match(d.posts.join('\n'), /SNARE.*humanize on/);
 });
+
+test('at compile time the script reads Mode and Humanize from the patcher', () => {
+  const d = load('drum-mapper', 'alberton-drum-mapper.js', { controls: { 'live.menu': 3, humanize: 0 } });
+  assert.equal(d.ctx.mode, 0, 'before the sync task runs');
+  d.Task.advance(0);
+  assert.equal(d.ctx.mode, 3);
+  assert.equal(d.ctx.humanizeOn, 0);
+  const plain = load('drum-mapper', 'alberton-drum-mapper.js');
+  plain.Task.advance(0);
+  assert.equal(plain.ctx.mode, 0, 'no controls, no change, no error');
+  assert.equal(plain.posts.length, 0);
+});

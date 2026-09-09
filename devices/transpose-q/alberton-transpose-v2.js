@@ -102,6 +102,23 @@ function apply() {
     log("applied " + currentTranspose);
 }
 
+// After a recompile (autowatch, while developing) every var above is back at its initial
+// value, but the patcher's controls do not send theirs again. So read them: patcher
+// objects answer getvalueof() with what they show. Harmless at a normal load, where the
+// controls send their values anyway.
+function syncFromPatcher() {
+    try {
+        var pend = patcher.getnamed("live.dial");         // Pending
+        var cur = patcher.getnamed("live.dial[1]");       // Current
+        if (pend) pendingTranspose = Math.round(pend.getvalueof());
+        if (cur) currentTranspose = Math.round(cur.getvalueof());
+    } catch (e) {
+        warn("could not read the patcher's controls: " + e);
+    }
+}
+var syncTask = new Task(syncFromPatcher, this);
+syncTask.schedule(0);
+
 // ============ TARGETS ============
 
 var pitchTargets = null;       // Live API paths of every Pitch parameter to write

@@ -185,6 +185,23 @@ function releaseAll() {
     for (var i = 0; i < held.length; i++) outlet(0, [held[i], 0]);
 }
 
+// After a recompile (autowatch, while developing) every var above is back at its initial
+// value, but the patcher's controls do not send theirs again. So read them: patcher
+// objects answer getvalueof() with what they show. Harmless at a normal load, where the
+// controls send their values anyway.
+function syncFromPatcher() {
+    try {
+        var menu = patcher.getnamed("live.menu");     // the Mode menu
+        if (menu) msg_int(Math.round(menu.getvalueof()));
+        var toggle = patcher.getnamed("humanize");
+        if (toggle) humanize(Math.round(toggle.getvalueof()));
+    } catch (e) {
+        post("Drum Mapper: could not read the patcher's controls: " + e + "\n");
+    }
+}
+var syncTask = new Task(syncFromPatcher, this);
+syncTask.schedule(0);
+
 function bang() {
     var modeNames = ["KICK", "SNARE", "HIHAT", "CYMBALS"];
     post("Drum Mapper: mode " + modeNames[mode] + ", humanize " + (humanizeOn ? "on" : "off") + "\n");
