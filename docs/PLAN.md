@@ -142,7 +142,7 @@ repository created from the working folder with its history, first push.
 
 **Principle: the panel knows nothing about the set. It broadcasts; receivers bind tracks.**
 
-- **Strips.** Sixteen identical strips, each with a `Program` dial (0–127) and a `Volume` dial,
+- **Strips** — **built 2026-09-09, two rows of eight, volume under program.** Sixteen identical strips, each with a `Program` dial (0–127) and a `Volume` dial,
   plus a `Main` volume dial. The nine FX multisliders stay in V5.0. Everything in a strip is a
   member of the kit, so a kit is one snapshot of programs, volumes and FX, recalled by number or by
   MIDI program change as today. The 150 ms program-change queue stays.

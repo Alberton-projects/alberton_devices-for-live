@@ -174,6 +174,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   reload, which makes this kind of test cheap. A `live.button` sends a bang, not its name:
   the panel's Who needed a `bang()`.
 
+- **Kit Selector V5 panel with two Kit Receivers, on the set** (2026-09-09, three test tracks,
+  driven over MCP): P1 66 reached Macro 1 of the rack on the track whose receiver is strip 1
+  with Action Macro 1; V1 set that track's volume; P2 showed on the strip-2 receiver's Last and
+  V2 set its volume. The bus channel, the strip filter, the program queue and the volume path
+  all hold together end to end. The kit grid, the labels and the MIDI recall need hands and
+  eyes: the owner's.
+
 ## Not yet verified
 
 

@@ -18,15 +18,17 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: the design checks passed and the Kit Receiver is built and verified; the panel is next. Phase 1 complete |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built; the bus verified end to end on test tracks; kit grid, labels and MIDI recall to be checked by the owner, then the kit migration and the switch. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q`, `kit-selector`, `bass-mapper`, `drum-mapper`, `gamepad` and the new Kit Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form |
+| Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad` and the new Kit Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-09** — Alberton Kit Selector V5 panel built (`54e0023`): generated patcher, seven
+  tests, the bus verified end to end with two receivers on test tracks (HANDOFF).
 - **2026-09-09** — Alberton Kit Receiver built (`3d5649a`): generated patcher, ten tests, every
   action verified on a test track over MCP (HANDOFF). Installed in development form; not yet
   on any of the set's tracks.
