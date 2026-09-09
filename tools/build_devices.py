@@ -69,7 +69,7 @@ FX_KEYS = ["drums", "bass", "pads", "pianos", "leads", "loops", "vocoder", "voca
 
 def kit_selector_v5():
     folder = os.path.join(ROOT, "devices", "kit-selector")
-    p = Patcher("midi", 1086, 169)
+    p = Patcher("midi", 1170, 169)
     # the sixteen strips: two rows of eight, program above volume, the track's name on top
     subscribe = []
     for n in range(1, 17):
@@ -87,26 +87,27 @@ def kit_selector_v5():
         p.line("obj-v%d" % n, 0, "obj-pv%d" % n, 0); p.line("obj-pv%d" % n, 0, "obj-js", 0)
         subscribe += ["subscribe p%d" % n, "subscribe v%d" % n]
     # kits: the preset grid, the name, the recall by MIDI, and the settings
-    p.box("obj-preset", "preset", rect=[548, 4, 152, 60], bubblesize=15, numinlets=1, numoutlets=5,
+    # the kit grid: 32 kits, three rows of eleven, big enough to hit on stage
+    p.box("obj-preset", "preset", rect=[548, 4, 236, 72], bubblesize=16, numinlets=1, numoutlets=5,
           outlettype=["preset", "int", "preset", "int", ""], pattrstorage="kits")
-    p.box("obj-name", "textedit", rect=[548, 68, 152, 18], keymode=1, numinlets=1, numoutlets=4, outlettype=["", "int", "", ""],
+    p.box("obj-name", "textedit", rect=[548, 80, 236, 18], keymode=1, numinlets=1, numoutlets=4, outlettype=["", "int", "", ""],
           parameter_enable=0, fontsize=10.0, bgcolor=[0.2, 0.2, 0.2, 1.0], textcolor=[0.9, 0.9, 0.9, 1.0], varname="presetname")
     subscribe.append("subscribe presetname")
-    p.textbutton("obj-send", "Send", [548, 90, 48, 18], longname="Send", varname="send")
-    p.textbutton("obj-refresh", "Refresh", [600, 90, 48, 18], longname="Refresh", varname="refreshbtn")
-    p.textbutton("obj-capture", "FX Capture", [652, 90, 48, 18], longname="FX Capture", varname="fxcapture")
-    p.comment("obj-l-midich", "MIDI Ch", [548, 112, 40, 12], 8.0)
-    p.numbox("obj-midich", "MIDI Ch", [548, 126, 36, 15], initial=1, lo=1, hi=16, shortname="MIDICh", varname="midich")
-    p.comment("obj-l-bus", "Bus", [590, 112, 36, 12], 8.0)
-    p.numbox("obj-bus", "Bus", [590, 126, 36, 15], initial=1, lo=1, hi=4, varname="bus")
-    p.comment("obj-l-main", "Main", [640, 112, 60, 12], 8.0)
-    p.dial("obj-vmain", "Main Volume", [640, 126, 60, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
+    p.textbutton("obj-send", "Send", [548, 102, 56, 18], longname="Send", varname="send")
+    p.textbutton("obj-refresh", "Refresh", [608, 102, 56, 18], longname="Refresh", varname="refreshbtn")
+    p.textbutton("obj-capture", "FX Capture", [668, 102, 70, 18], longname="FX Capture", varname="fxcapture")
+    p.comment("obj-l-midich", "MIDI Ch", [548, 124, 40, 12], 8.0)
+    p.numbox("obj-midich", "MIDI Ch", [548, 138, 36, 15], initial=1, lo=1, hi=16, shortname="MIDICh", varname="midich")
+    p.comment("obj-l-bus", "Bus", [592, 124, 36, 12], 8.0)
+    p.numbox("obj-bus", "Bus", [592, 138, 36, 15], initial=1, lo=1, hi=4, varname="bus")
+    p.comment("obj-l-main", "Main", [640, 124, 60, 12], 8.0)
+    p.dial("obj-vmain", "Main Volume", [640, 138, 60, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
     p.boxes[-1]["showname"] = 0
     subscribe.append("subscribe vmain")
     # the fx banks (V5.0: by group name), 70x40 as in V4.3, in two rows
     for i, key in enumerate(FX_KEYS):
         col, row = i % 5, i // 5
-        x, y = 712 + 74 * col, 4 + 68 * row
+        x, y = 796 + 74 * col, 4 + 68 * row
         p.comment("obj-lfx-" + key, key, [x, y, 70, 12], 8.0)
         p.box("obj-" + key, "multislider", rect=[x, y + 14, 70, 40], parameter_enable=1, numinlets=1, numoutlets=2, outlettype=["", ""],
               saved_attribute_attributes={"valueof": {"parameter_invisible": 1, "parameter_longname": key + "_fx", "parameter_modmode": 0,
