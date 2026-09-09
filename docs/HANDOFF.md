@@ -200,6 +200,12 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   came out as "V5 B"); renamed afterwards. Name tracks after creating them one at a time, or
   read the names back before using indices.
 
+- **V5.0 kits, end to end** (2026-09-09, test tracks): the owner stored kit 1 on the grid with
+  strip 1 at 66 / 0.4; the values were changed over the LOM to 10 / 0.9, reaching the rack
+  macro and the track volume; a program change 0 from the external controller, with the
+  panel's track armed, recalled the kit and the macro read 66 and the volume 0.4 again, the
+  other strip untouched. Store, MIDI recall, the ordered re-send and the receivers hold.
+
 ## Not yet verified
 
 

@@ -18,7 +18,7 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built; the bus verified end to end on test tracks; kit grid, labels and MIDI recall to be checked by the owner, then the kit migration and the switch. Phase 1 complete |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built and verified end to end on test tracks, kits and MIDI recall included; next the kit migration, the audio receiver (V5.1) and the switch. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
@@ -27,6 +27,8 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-09** — V5.0 verified end to end with the owner: store, MIDI recall, re-send (HANDOFF).
+  Kit grid enlarged to three rows of eleven (`f688a6b`).
 - **2026-09-09** — The August "parameter is disabled" mystery solved from Live's log: four
   disabled macros on the Vocals [FX] rack, written twice per recall; both scripts skip disabled
   macros. V5 panel layout redone after a screenshot; MIDI recall verified by the owner with the
