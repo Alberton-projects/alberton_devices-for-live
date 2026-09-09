@@ -153,7 +153,7 @@ repository created from the working folder with its history, first push.
   (`Bus` 1–4 is a device parameter, so two panels can coexist in one set):
   `prog <strip> <value>` · `vol <strip> <0..1>` · `fx <strip> <v1..v8>` · `capture` · `kit <n>` ·
   `who`. Receivers `route` on their own strip number. Replies travel on `ks<bus>_ret`.
-- **Kit Receiver** (MIDI effect, one per track): `Bus`, `Strip`, `Action` = Program Change /
+- **Kit Receiver** — **built and verified 2026-09-09** (MIDI effect, one per track): `Bus`, `Strip`, `Action` = Program Change /
   Chain Selector / Macro 1–16, `Apply volume` toggle. Program changes go to the instrument through
   `midiformat` as today; Chain Selector and Macro write to the first rack on the receiver's own
   track over the LOM (`this_device canonical_parent`), so the drum tracks stop needing their names.

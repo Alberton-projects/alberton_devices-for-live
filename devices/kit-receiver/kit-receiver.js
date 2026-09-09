@@ -157,6 +157,10 @@ function kit() {
     // informational: the panel says which kit it recalled; nothing to do here
 }
 
+function fx() {
+    // the FX receivers' business (V5.1); nothing to do here
+}
+
 function prog(s, value) {
     if (Math.round(s) !== stripNumber) return;
     value = Math.round(value);

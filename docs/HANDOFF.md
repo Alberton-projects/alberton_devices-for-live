@@ -165,6 +165,15 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   receiver should show its strip large and plain. The three throwaway devices are gone from
   the User Library; `test/live/build_v5_checks.py` rebuilds them.
 
+- **Alberton Kit Receiver, on the set** (2026-09-09, a test track with a throwaway panel and
+  an Instrument Rack, driven over MCP): a program for its strip went out as a program change
+  and showed on Last; with Action at Macro 1 it wrote Macro 1 of the first rack on its track;
+  with Action at Chain Selector it wrote the rack's chain selector; a program for another strip
+  was ignored; "who" from the panel brought back "bound <strip> <track name>" into a freshly
+  loaded panel, and a strip change re-announced. Devices loaded from the browser need no set
+  reload, which makes this kind of test cheap. A `live.button` sends a bang, not its name:
+  the panel's Who needed a `bang()`.
+
 ## Not yet verified
 
 

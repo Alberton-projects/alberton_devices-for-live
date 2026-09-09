@@ -18,15 +18,18 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: the three design checks passed, build not started. Phase 1 complete |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: the design checks passed and the Kit Receiver is built and verified; the panel is next. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q`, `kit-selector`, `bass-mapper`, `drum-mapper` and `gamepad` in development form (plain device, script symlinked from here); the Receiver and the Tempo Automator in release form |
+| Installed form | `transpose-q`, `kit-selector`, `bass-mapper`, `drum-mapper`, `gamepad` and the new Kit Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-09** — Alberton Kit Receiver built (`3d5649a`): generated patcher, ten tests, every
+  action verified on a test track over MCP (HANDOFF). Installed in development form; not yet
+  on any of the set's tracks.
 - **2026-09-09** — The three Live checks behind the V5 design passed (HANDOFF), with throwaway
   devices built by the new `tools/patcher.py`. On the way: `LiveAPI.id` of a dead path is the
   string `"0"`; every script's guards fixed (`7ae88af`).

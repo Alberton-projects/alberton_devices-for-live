@@ -33,6 +33,7 @@ var curStrip = 1;
 var curValue = 0;
 function strip(v) { curStrip = v; }
 function who() { outlet(0, "who"); }
+function bang() { who(); }   // the Who button sends a bang
 function bound(strip, name) { outlet(1, strip); post("panel: strip " + strip + " is '" + name + "'\\n"); }
 function value(v) {
     curValue = v;
