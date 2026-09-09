@@ -108,7 +108,11 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   nudging the three menus over MCP, and for good in every script: a Task scheduled at compile
   time reads the patcher's controls with `patcher.getnamed(varname).getvalueof()` (Mode and
   Humanize, Low and High, Pending and Current, the twelve Kit Selector dials), so a recompile
-  restores the state it just lost. Harmless at a normal load.
+  restores the state it just lost. Harmless at a normal load. **Verified in Live the same day**
+  on the Transpose Q: with the Current dial set to 5 over the LOM, a forced recompile (the
+  file touched) and Pending 5, eight bars of transport changed no Pitch device, and Pending 0
+  then brought Current to 0: the script had read both dials. `patcher.getnamed(varname)`
+  and `Maxobj.getvalueof()` work from a Task scheduled at compile time.
 
 ## Not yet verified
 

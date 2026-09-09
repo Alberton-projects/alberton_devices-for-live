@@ -27,6 +27,11 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-09** — Drum Mapper: each mode passes through only its own target notes, the
+  snare pool is the four GM snare sounds, toms pass by exact note (`f375df0`), after reading
+  the set's ten kits over the bridge socket. A save recompiled the four instances and lost
+  their Mode: every script now reads its controls back at compile time (`fed39de`),
+  verified on the Transpose Q. 41 tests.
 - **2026-09-09** — Mappers rewritten for Phase 1 (`1628c31`): shared note queue with `reset`
   and CC 120/123, every non-note message passed through, crash by pitch, hi-hat randomness
   behind a Humanize toggle, Low/High on the Bass Mapper, the drum menu named Mode. 37 tests.
