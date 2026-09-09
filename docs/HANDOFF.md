@@ -114,6 +114,18 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   then brought Current to 0: the script had read both dials. `patcher.getnamed(varname)`
   and `Maxobj.getvalueof()` work from a Task scheduled at compile time.
 
+- **A `live.menu` needs parameter mode to hold a list.** With `parameter_enable 0` the menu
+  had no enum, printed "Something bad happened, there's no enum" on every message and vanished
+  from the device. So the Gamepad's menu stays a Live parameter; the choice lives in the pattr
+  by name, an int the menu emits before the first scan is ignored, and the script never sends
+  it an empty list.
+- **`live.thisdevice` can fire before the set's Live API answers.** At load the Kit Selector's
+  refresh found `live_set` unreachable (the old script had the same branch, so this predates
+  the rewrite). It now retries every half second for ten seconds, and every write builds the
+  caches on first use anyway.
+- **`dict: could not retrieve key 1`**, four times at load, comes from the Gamepad's own
+  patcher (its `dict` objects), not from anything changed here. Noted, not chased.
+
 ## Not yet verified
 
 - The Gamepad after a save and reopen: the menu must show the track chosen before the save
