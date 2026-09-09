@@ -50,6 +50,13 @@ function guarded(what, fn) {
     }
 }
 
+// A LiveAPI object that resolved to something. Max answers the string "0" for a path
+// that resolves to nothing (and the number 0 before the API is up), so the test is a loose
+// comparison, never truthiness: "0" is true in JavaScript.
+function exists(api) {
+    return !!api && api.id != 0;
+}
+
 // ============ STATE ============
 
 var pendingTranspose = 0;
@@ -213,7 +220,7 @@ function applyTranspose(value) {
         var written = 0;
         for (var i = 0; i < pitchTargets.length; i++) {
             var api = new LiveAPI(pitchTargets[i]);
-            if (api.id) {
+            if (exists(api)) {
                 api.set("value", value);
                 written++;
             } else {

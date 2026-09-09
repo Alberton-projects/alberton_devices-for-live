@@ -71,7 +71,8 @@ function makeLiveAPI(tree, log, posts) {
     static get observers() { return observers; }
     get path() { return this._path; }
     set path(p) { this._path = String(p); this.node = resolve(p); }
-    get id() { return this.node ? this.node.id : 0; }
+    // Max answers the string "0" for a path that resolves to nothing (verified 2026-09-09).
+    get id() { return this.node ? this.node.id : '0'; }
     get(prop) {
       if (!this.node) return null;
       const kid = (this.node.children || {})[prop];

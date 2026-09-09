@@ -14,7 +14,7 @@ from devices import amxd, build_plain, patcher_of, scripts_used
 def to_plain(src, dst):
     doc = amxd.read_amxd(src)
     with open(dst, "wb") as f:
-        f.write(build_plain(doc["json_text"]))
+        f.write(build_plain(doc["json_text"], doc["raw"][8:12]))
     return scripts_used(patcher_of(doc))
 
 

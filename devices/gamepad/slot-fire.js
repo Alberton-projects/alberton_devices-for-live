@@ -54,6 +54,13 @@ function guarded(what, fn) {
     }
 }
 
+// A LiveAPI object that resolved to something. Max answers the string "0" for a path
+// that resolves to nothing (and the number 0 before the API is up), so the test is a loose
+// comparison, never truthiness: "0" is true in JavaScript.
+function exists(api) {
+    return !!api && api.id != 0;
+}
+
 // ============ STATE ============
 
 var track_names = [];          // the set's tracks, in order, as last scanned
@@ -157,7 +164,7 @@ function fire_slot(slot) {
     if (target_track_index < 0 || target_track_index >= track_names.length) return;
     guarded("firing slot " + slot, function () {
         var cs = new LiveAPI("live_set tracks " + target_track_index + " clip_slots " + slot);
-        if (!cs.id) {
+        if (!exists(cs)) {
             warn("no clip slot " + slot + " on '" + track_names[target_track_index] + "'");
             return;
         }
@@ -170,7 +177,7 @@ function fire_slot(slot) {
 function fire_scene(n) {
     guarded("firing scene " + n, function () {
         var scene = new LiveAPI("live_set scenes " + n);
-        if (!scene.id) {
+        if (!exists(scene)) {
             warn("no scene " + n);
             return;
         }

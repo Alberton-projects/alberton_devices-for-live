@@ -52,6 +52,8 @@ appear here: not in code, not in constants, not in comments.
 - Renaming a Live parameter in a patcher loses its saved value in every set that uses the
   device (verified 2026-09-09 on the Drum Mapper's Mode). Parameters that carry state keep
   their names.
+- `LiveAPI.id` is the string `"0"` for a path that resolves to nothing. Test `api.id != 0`
+  (the scripts' `exists()`), never truthiness.
 - Live reads a device file when the device is instantiated. A patcher edit needs the set
   reloaded; a script edit does not when the device is installed in development form.
 

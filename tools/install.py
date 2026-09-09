@@ -78,7 +78,7 @@ def main(argv):
                     if not dry:
                         os.unlink(link)
         else:
-            kept = replace(dst, build_plain(doc["json_text"]), stamp, dry)
+            kept = replace(dst, build_plain(doc["json_text"], doc["raw"][8:12]), stamp, dry)
             print("  %-40s -> %s  [plain]" % (e["file"], dst))
             if kept:
                 print("      kept %s" % kept)

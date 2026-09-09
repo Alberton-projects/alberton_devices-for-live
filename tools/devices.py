@@ -85,10 +85,18 @@ def read_sources(entry, wanted):
     return sources, mtimes
 
 
-def build_plain(json_text):
+KINDS = {"midi": b"mmmm", "audio": b"aaaa", "instrument": b"iiii"}
+
+
+def kind_of(raw):
+    """The device type of an .amxd, from its header: midi, audio or instrument."""
+    return {v: k for k, v in KINDS.items()}.get(raw[8:12], "midi")
+
+
+def build_plain(json_text, kind=b"mmmm"):
     """A device that depends on nothing: the 32-byte header, then the NUL-terminated patcher."""
     payload = json_text.encode("utf-8") + b"\x00"
-    head = (b"ampf" + struct.pack("<I", 4) + b"mmmm"
+    head = (b"ampf" + struct.pack("<I", 4) + kind
             + b"meta" + struct.pack("<II", 4, 1)
             + b"ptch" + struct.pack("<I", len(payload)))
     assert len(head) == amxd.BASE
@@ -98,7 +106,7 @@ def build_plain(json_text):
     return out
 
 
-def build_embedded(doc, name, sources, mtimes):
+def build_embedded(doc, name, sources, mtimes, kind=None):
     """A collective from a device's patcher plus {script: bytes}, verified before it is returned.
 
     `name` is the device file name: Max records it as the patcher entry's own name.
@@ -106,7 +114,7 @@ def build_embedded(doc, name, sources, mtimes):
     files = [(s, sources[s], b"TEXT") for s in sources]
     mdat = ([int(mtimes.get(name, 0)) + MAC_EPOCH]
             + [int(mtimes.get(s, 0)) + MAC_EPOCH for s in sources])
-    out = amxd.build_collective(doc["json_text"], name, files, mdat=mdat)
+    out = amxd.build_collective(doc["json_text"], name, files, mdat=mdat, kind=kind or doc["raw"][8:12])
     back = amxd.read_amxd_bytes(out)
     assert back["collective"]
     assert json.loads(back["json_text"]) == json.loads(doc["json_text"])

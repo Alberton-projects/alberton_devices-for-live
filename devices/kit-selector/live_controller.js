@@ -57,6 +57,13 @@ function count(obj) {
     return n;
 }
 
+// A LiveAPI object that resolved to something. Max answers the string "0" for a path
+// that resolves to nothing (and the number 0 before the API is up), so the test is a loose
+// comparison, never truthiness: "0" is true in JavaScript.
+function exists(api) {
+    return !!api && api.id != 0;
+}
+
 // ============ PC QUEUE (V4.1.1) ============
 // Program changes are spaced out; several at once crashed Analog Lab.
 
@@ -235,7 +242,7 @@ function bang() {
 function ensureCache() {
     if (cacheValid) {
         var api = new LiveAPI("live_set");
-        if (api.id && api.getcount("tracks") === cachedTrackCount) return;
+        if (exists(api) && api.getcount("tracks") === cachedTrackCount) return;
         log("track count changed, refreshing");
     }
     refresh();
@@ -275,7 +282,7 @@ function attemptRefresh() {
     cacheValid = false;
 
     var api = new LiveAPI("live_set");
-    if (!api.id) {
+    if (!exists(api)) {
         scheduleRetry();
         return;
     }
@@ -375,7 +382,7 @@ function findChainParameter(trackPath) {
     for (var d = 0; d < deviceCount; d++) {
         var devicePath = trackPath + " devices " + d;
         var deviceApi = new LiveAPI(devicePath);
-        if (!deviceApi.id) continue;
+        if (!exists(deviceApi)) continue;
         var paramCount = deviceApi.getcount("parameters");
         for (var p = 0; p < paramCount; p++) {
             var paramApi = new LiveAPI(devicePath + " parameters " + p);
@@ -399,7 +406,7 @@ function findPresetParameter(trackIndex) {
     for (var d = 0; d < deviceCount; d++) {
         var devicePath = trackPath + " devices " + d;
         var deviceApi = new LiveAPI(devicePath);
-        if (!deviceApi.id) continue;
+        if (!exists(deviceApi)) continue;
 
         var deviceName = deviceApi.get("name").toString();
         var deviceClass = deviceApi.get("class_name").toString();
@@ -448,7 +455,7 @@ function findFXDevice(trackIndex) {
     for (var d = 0; d < deviceCount; d++) {
         var devicePath = trackPath + " devices " + d;
         var deviceApi = new LiveAPI(devicePath);
-        if (!deviceApi.id) continue;
+        if (!exists(deviceApi)) continue;
         var deviceName = deviceApi.get("name").toString();
         if (deviceName.indexOf("[FX]") >= 0 || deviceName.indexOf("[fx]") >= 0) {
             return { deviceIndex: d, devicePath: devicePath, deviceName: deviceName };
@@ -469,7 +476,7 @@ function listParams(trackIndex) {
         for (var d = 0; d < deviceCount; d++) {
             var devicePath = trackPath + " devices " + d;
             var deviceApi = new LiveAPI(devicePath);
-            if (!deviceApi.id) continue;
+            if (!exists(deviceApi)) continue;
             var paramCount = deviceApi.getcount("parameters");
             post("--- Device " + d + ": " + deviceApi.get("name") + " (" + deviceApi.get("class_name") + "), " + paramCount + " parameters\n");
             for (var i = 0; i < paramCount; i++) {
@@ -501,7 +508,7 @@ function setDrumChain(trackKey, value) {
     }
     guarded("setDrumChain " + trackKey, function () {
         var api = new LiveAPI(cache.chainPath);
-        if (!api.id) {
+        if (!exists(api)) {
             warn("setDrumChain: the chain selector of '" + cache.name + "' is gone (send refresh)");
             return;
         }
@@ -596,7 +603,7 @@ function applyFX(fxKey, values) {
     guarded("recall of " + fxKey + " fx", function () {
         for (var i = 0; i < 9 && i < values.length; i++) {
             var api = new LiveAPI(cache.devicePath + " parameters " + (i + 1));
-            if (!api.id) {
+            if (!exists(api)) {
                 warn("recall of " + fxKey + " fx: the [FX] rack is gone (send refresh)");
                 return;
             }
@@ -624,7 +631,7 @@ function resetVolumes() {
         var t = volumeTargets[i];
         guarded("volume of " + t.name, function () {
             var api = new LiveAPI(t.path);
-            if (api.id) {
+            if (exists(api)) {
                 api.set("value", t.value);
                 resetCount++;
             }

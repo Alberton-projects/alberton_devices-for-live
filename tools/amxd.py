@@ -142,8 +142,11 @@ def _rec(tag, payload):
     return tag + struct.pack(">I", 8 + len(payload)) + payload
 
 
-def build_collective(json_text, device_name, files, mdat=(0, 0)):
+def build_collective(json_text, device_name, files, mdat=(0, 0), kind=b"mmmm"):
     """Build a collective .amxd: patcher JSON plus embedded dependencies.
+
+    kind: the device type at offset 8 -- b"mmmm" MIDI effect, b"aaaa" audio effect,
+    b"iiii" instrument (the same code sits in the patcher's project.amxdtype).
 
     files: [(filename, bytes, four-char type)] -- b"TEXT" for .js, b"JSON" for
     a patcher, b"mx@c" style four-char codes otherwise.  mdat is one classic-Mac
@@ -174,7 +177,7 @@ def build_collective(json_text, device_name, files, mdat=(0, 0)):
 
     dlst = _rec(b"dlst", b"".join(entries))
     body = b"mx@c" + struct.pack(">III", 16, 0, off) + b"".join(blobs) + dlst
-    head = (b"ampf" + struct.pack("<I", 4) + b"mmmm"
+    head = (b"ampf" + struct.pack("<I", 4) + kind
             + b"meta" + struct.pack("<II", 4, 7)
             + b"ptch" + struct.pack("<I", len(body)))
     assert len(head) == BASE
