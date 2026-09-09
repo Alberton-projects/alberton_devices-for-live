@@ -27,6 +27,13 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — Kit Receivers on fourteen tracks of the real set, beside the old PC Receivers:
+  strips 1–4 Kick, Snare, HiHat, Cymbals (Macro 1), 5–12 Bass Electric, Bass Synth, Pad 1, Pad 2,
+  Piano 1, Piano 2, Lead 1, Lead 2 (Program Change), 13–14 Vocoder and Live Scratcher (None).
+  Apply Volume off everywhere until the kits are migrated. The V5 panel sits on a test track
+  named "V5 panel" (monitor In) and mirrors the V4.3 dials. A receiver gains a None action.
+  Loading onto a track inside a folded group fails ("The given Track is invisible"): unfold,
+  load, fold again.
 - **2026-09-09** — V5.0 verified end to end with the owner: store, MIDI recall, re-send (HANDOFF).
   Kit grid enlarged to three rows of eleven (`f688a6b`).
 - **2026-09-09** — The August "parameter is disabled" mystery solved from Live's log: four

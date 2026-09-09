@@ -206,6 +206,10 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   panel's track armed, recalled the kit and the macro read 66 and the volume 0.4 again, the
   other strip untouched. Store, MIDI recall, the ordered re-send and the receivers hold.
 
+- **The browser cannot load onto a track hidden inside a folded group**: `load_device` fails
+  with "The given Track is invisible". Unfold the group (`fold_state` false), load, fold it
+  back. Live puts a MIDI effect loaded this way before the track's instrument by itself.
+
 ## Not yet verified
 
 
