@@ -116,7 +116,9 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 
 ## Not yet verified
 
-- The mappers with sound: a held and retriggered note, the sustain pedal through the Bass
-  Mapper, CC 123 releasing what is held.
+- The Gamepad after a save and reopen: the menu must show the track chosen before the save
+  (a `pattr @parameter_enable 1` holding a symbol is the mechanism under test; the Kit
+  Selector's pattrstorage proves blob parameters, not a bare pattr with a symbol). Firing
+  from the pad on the chosen track, and the scenes.
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

@@ -18,15 +18,19 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 1, safety and speed (`docs/PLAN.md` §2): 1.1 Kit Selector and 1.3 Transpose Q done and verified in Live; 1.4 mappers done, awaiting the test with sound; 1.2 Gamepad open |
+| Phase | 1, safety and speed (`docs/PLAN.md` §2): 1.1 Kit Selector, 1.3 Transpose Q and 1.4 mappers done and verified in Live; 1.2 Gamepad coded and installed, awaiting the save-and-reopen test and a session with the pad |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q`, `kit-selector`, `bass-mapper` and `drum-mapper` in development form (plain device, script symlinked from here); the Receiver, the Gamepad and the Tempo Automator in release form |
+| Installed form | `transpose-q`, `kit-selector`, `bass-mapper`, `drum-mapper` and `gamepad` in development form (plain device, script symlinked from here); the Receiver and the Tempo Automator in release form |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ## Log
 
+- **2026-09-09** — Mappers verified with sound by the owner (held notes, pedal, CC 123, the
+  narrowed snare and cymbal maps). Gamepad rewritten for Phase 1 (`70e8ad2`): the chosen track
+  kept by name in a blob pattr saved with the set, firing by index, tracks observer, guards.
+  48 tests. Installed in development form; the reopen test is pending.
 - **2026-09-09** — Drum Mapper: each mode passes through only its own target notes, the
   snare pool is the four GM snare sounds, toms pass by exact note (`f375df0`), after reading
   the set's ten kits over the bridge socket. A save recompiled the four instances and lost
