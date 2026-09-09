@@ -83,13 +83,15 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 
 - **Renaming a Live parameter in the patcher** (the Drum Mapper's menu `live.menu` → `Mode`,
   the Transpose Q dial → `Current`) is done in two places: the box's `valueof` and the
-  patcher's root `parameters` table, which Max keeps as a cache of names. Whether Live restores
-  a saved value under the new name is checked at the next reload of the set (the four drum
-  Modes were 0, 1, 2, 3 before).
+  patcher's root `parameters` table, which Max keeps as a cache of names. **Live does not
+  restore a saved value under a new name**: after the rename the four drum Modes, which were
+  0, 1, 2, 3, all came back as 0 and had to be set again over MCP. So a parameter that carries
+  state in someone's set keeps its name, or the release notes say what to set again. The
+  Humanize toggle, new, came up at its initial value 1 on all four, as intended.
 
 ## Not yet verified
 
 - The mappers with sound: a held and retriggered note, the sustain pedal through the Bass
-  Mapper, CC 123 releasing what is held, the four Modes after the rename.
+  Mapper, CC 123 releasing what is held.
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
