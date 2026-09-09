@@ -28,10 +28,12 @@ AUDIO_DIR = os.path.join(UL, "Presets", "Audio Effects", "Max Audio Effect")
 
 PANEL_JS = b"""// Test V5 Panel: one send for everything, the strip number inside the message.
 inlets = 1;
-outlets = 1;
+outlets = 2;   // 0: the bus, 1: the strip a receiver last announced on the reply channel
 var curStrip = 1;
 var curValue = 0;
 function strip(v) { curStrip = v; }
+function who() { outlet(0, "who"); }
+function bound(strip, name) { outlet(1, strip); post("panel: strip " + strip + " is '" + name + "'\\n"); }
 function value(v) {
     curValue = v;
     outlet(0, "prog", curStrip, curValue);
@@ -82,8 +84,13 @@ def panel():
     p.numbox("obj-strip", "Strip", [8, 40, 44, 15], initial=1, lo=1, hi=16, varname="strip")
     p.comment("obj-lv", "Value", [60, 24, 44, 14], 9.0)
     p.numbox("obj-value", "Value", [60, 40, 44, 15], initial=0, varname="value")
+    p.comment("obj-lb", "Bound", [112, 24, 44, 14], 9.0)
+    p.numbox("obj-bound", "Bound", [112, 40, 44, 15], initial=0, lo=0, hi=16, varname="bound")
+    p.button("obj-who", "Who", [164, 40, 40, 15], varname="who")
+    p.newobj("obj-rret", "r ks1_ret", [600, 300], n_in=0, n_out=1)
     p.newobj("obj-ps", "prepend strip", [40, 300]); p.newobj("obj-pv", "prepend value", [200, 300])
-    p.js("obj-js", "v5-panel-test.js", [40, 340]); p.newobj("obj-send", "s ks1", [40, 380], n_out=0, outlettype=[])
+    p.js("obj-js", "v5-panel-test.js", [40, 340], n_out=2); p.newobj("obj-send", "s ks1", [40, 380], n_out=0, outlettype=[])
+    p.line("obj-rret", 0, "obj-js", 0); p.line("obj-js", 1, "obj-bound", 0); p.line("obj-who", 0, "obj-js", 0)
     p.newobj("obj-in", "midiin", [400, 300], n_in=0, n_out=1); p.newobj("obj-out", "midiout", [400, 340], n_out=0, outlettype=[])
     for a, b in [("obj-strip", "obj-ps"), ("obj-ps", "obj-js"), ("obj-value", "obj-pv"), ("obj-pv", "obj-js"), ("obj-js", "obj-send"), ("obj-in", "obj-out")]:
         p.line(a, 0, b, 0)

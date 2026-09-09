@@ -387,7 +387,7 @@ function findChainParameter(trackPath) {
         for (var p = 0; p < paramCount; p++) {
             var paramApi = new LiveAPI(devicePath + " parameters " + p);
             if (paramApi.get("name").toString().indexOf("Chain") >= 0) {
-                return paramApi.path;
+                return paramApi.unquotedpath;   // path itself comes back quoted
             }
         }
     }
@@ -428,7 +428,7 @@ function findPresetParameter(trackIndex) {
                 lowerName.indexOf("program") >= 0 ||
                 lowerName.indexOf("patch") >= 0) {
                 return {
-                    trackPath: trackPath, paramPath: paramApi.path, name: paramName,
+                    trackPath: trackPath, paramPath: paramApi.unquotedpath, name: paramName,
                     max: paramApi.get("max"), deviceIndex: d, vstName: deviceName
                 };
             }

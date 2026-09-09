@@ -43,7 +43,8 @@ FakeTask.reset();
 // error and goes on; it does not throw.
 function makeLiveAPI(tree, log, posts) {
   function resolve(p) {
-    const parts = String(p).trim().split(/\s+/).filter(Boolean);
+    // Max accepts a path with or without the quotes `path` returns; so does this.
+    const parts = String(p).replace(/^"|"$/g, '').trim().split(/\s+/).filter(Boolean);
     let node = tree[parts[0]];
     let i = 1;
     while (node && i < parts.length) {
@@ -69,7 +70,9 @@ function makeLiveAPI(tree, log, posts) {
     set property(prop) { this._property = prop; observers.push(this); if (this.callback) this.callback([prop].concat(this.get(prop))); }
     static notify(prop) { for (const o of observers) if (o._property === prop && o.callback) o.callback([prop].concat(o.get(prop))); }
     static get observers() { return observers; }
-    get path() { return this._path; }
+    get path() { return '"' + this.unquotedpath + '"'; }
+    // the canonical path, as Max returns it: a node may carry `canonical` for alias paths such as this_device
+    get unquotedpath() { return this.node ? (this.node.canonical || this._path) : ''; }
     set path(p) { this._path = String(p); this.node = resolve(p); }
     // Max answers the string "0" for a path that resolves to nothing (verified 2026-09-09).
     get id() { return this.node ? this.node.id : '0'; }
@@ -123,7 +126,11 @@ function load(device, script, opts = {}) {
     // Notes arrive as "list pitch velocity" on inlet 0.
     note(pitch, vel) { ctx.inlet = 0; return ctx.list(pitch, vel); },
     // Everything sent from outlet `i` since the last take, then cleared.
-    take(i = 0) { const mine = out.filter(o => o.index === i).map(o => o.args); out.length = 0; return mine; },
+    take(i = 0) {
+      const mine = out.filter(o => o.index === i).map(o => o.args);
+      for (let k = out.length - 1; k >= 0; k--) if (out[k].index === i) out.splice(k, 1);   // only this outlet's
+      return mine;
+    },
   };
 }
 
