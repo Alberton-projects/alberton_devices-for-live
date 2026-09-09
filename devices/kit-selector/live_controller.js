@@ -244,22 +244,30 @@ function ensureCache() {
 var retryTask = null;
 var retriesLeft = 0;
 
-function retryRefresh() {
-    if (retryTask) return;
-    retriesLeft = 20;                      // ten seconds, then give up quietly; the first use refreshes anyway
-    retryTask = new Task(function () {
+// A fresh attempt: arm the retries, drop any pending one, scan now.
+function refresh() {
+    retriesLeft = 20;                      // ten seconds at 500 ms, then one warning and silence
+    if (retryTask) {
         retryTask.cancel();
         retryTask = null;
-        if (retriesLeft-- <= 0) {
-            warn("refresh: the Live API never answered; caches will be built on first use");
-            return;
-        }
-        refresh();
+    }
+    attemptRefresh();
+}
+
+// live.thisdevice can fire before the set's Live API answers; then try again shortly.
+function scheduleRetry() {
+    if (retriesLeft-- <= 0) {
+        warn("refresh: the Live API never answered; caches will be built on first use");
+        return;
+    }
+    retryTask = new Task(function () {
+        retryTask = null;
+        attemptRefresh();
     }, this);
     retryTask.schedule(500);
 }
 
-function refresh() {
+function attemptRefresh() {
     drumCache = {};
     melodicCache = {};
     fxCache = {};
@@ -268,8 +276,7 @@ function refresh() {
 
     var api = new LiveAPI("live_set");
     if (!api.id) {
-        // live.thisdevice can fire before the set's Live API answers; try again shortly.
-        retryRefresh();
+        scheduleRetry();
         return;
     }
     var trackCount = api.getcount("tracks");
