@@ -69,43 +69,46 @@ FX_KEYS = ["drums", "bass", "pads", "pianos", "leads", "loops", "vocoder", "voca
 
 def kit_selector_v5():
     folder = os.path.join(ROOT, "devices", "kit-selector")
-    p = Patcher("midi", 1116, 169)
-    p.comment("obj-title", "Kit Selector V5", [8, 1, 140, 12], 9.0)
+    p = Patcher("midi", 1086, 169)
     # the sixteen strips: two rows of eight, program above volume, the track's name on top
     subscribe = []
     for n in range(1, 17):
         col, row = (n - 1) % 8, (n - 1) // 8
-        x, y = 8 + 66 * col, 14 + 56 * row
-        p.comment("obj-lab%d" % n, "Strip %d" % n, [x, y, 64, 11], 8.0)
+        x, y = 8 + 66 * col, 4 + 78 * row
+        p.comment("obj-lab%d" % n, "Strip %d" % n, [x, y, 64, 12], 8.0)
         p.boxes[-1]["varname"] = "lab%d" % n
-        p.dial("obj-p%d" % n, "Program %d" % n, [x, y + 12, 62, 15], initial=0, shortname="P%d" % n, varname="p%d" % n, tiny=True)
-        p.dial("obj-v%d" % n, "Volume %d" % n, [x, y + 30, 62, 15], initial=0.85, lo=0, hi=1, unit=1, shortname="V%d" % n, varname="v%d" % n, is_float=True, tiny=True)
+        p.dial("obj-p%d" % n, "Program %d" % n, [x, y + 14, 62, 26], initial=0, shortname="P%d" % n, varname="p%d" % n, tiny=True)
+        p.boxes[-1]["showname"] = 0
+        p.dial("obj-v%d" % n, "Volume %d" % n, [x, y + 44, 62, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="V%d" % n, varname="v%d" % n, is_float=True, tiny=True)
+        p.boxes[-1]["showname"] = 0
         p.newobj("obj-pp%d" % n, "prepend p%d" % n, [40 + 60 * col, 500 + 60 * row])
         p.newobj("obj-pv%d" % n, "prepend v%d" % n, [40 + 60 * col, 530 + 60 * row])
         p.line("obj-p%d" % n, 0, "obj-pp%d" % n, 0); p.line("obj-pp%d" % n, 0, "obj-js", 0)
         p.line("obj-v%d" % n, 0, "obj-pv%d" % n, 0); p.line("obj-pv%d" % n, 0, "obj-js", 0)
         subscribe += ["subscribe p%d" % n, "subscribe v%d" % n]
     # kits: the preset grid, the name, the recall by MIDI, and the settings
-    p.box("obj-preset", "preset", rect=[548, 14, 152, 70], bubblesize=17, numinlets=1, numoutlets=5,
+    p.box("obj-preset", "preset", rect=[548, 4, 152, 60], bubblesize=15, numinlets=1, numoutlets=5,
           outlettype=["preset", "int", "preset", "int", ""], pattrstorage="kits")
-    p.box("obj-name", "textedit", rect=[548, 90, 152, 18], keymode=1, numinlets=1, numoutlets=4, outlettype=["", "int", "", ""],
+    p.box("obj-name", "textedit", rect=[548, 68, 152, 18], keymode=1, numinlets=1, numoutlets=4, outlettype=["", "int", "", ""],
           parameter_enable=0, fontsize=10.0, bgcolor=[0.2, 0.2, 0.2, 1.0], textcolor=[0.9, 0.9, 0.9, 1.0], varname="presetname")
     subscribe.append("subscribe presetname")
-    p.textbutton("obj-send", "Send", [548, 114, 48, 18], longname="Send", varname="send")
-    p.textbutton("obj-refresh", "Refresh", [600, 114, 48, 18], longname="Refresh", varname="refreshbtn")
-    p.textbutton("obj-capture", "FX Capture", [652, 114, 48, 18], longname="FX Capture", varname="fxcapture")
-    p.comment("obj-l-midich", "MIDI Ch", [548, 138, 40, 11], 8.0)
-    p.numbox("obj-midich", "MIDI Ch", [548, 150, 36, 15], initial=1, lo=1, hi=16, shortname="MIDICh", varname="midich")
-    p.comment("obj-l-bus", "Bus", [590, 138, 36, 11], 8.0)
-    p.numbox("obj-bus", "Bus", [590, 150, 36, 15], initial=1, lo=1, hi=4, varname="bus")
-    p.comment("obj-l-main", "Main", [640, 138, 60, 11], 8.0)
-    p.dial("obj-vmain", "Main Volume", [640, 150, 60, 15], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
+    p.textbutton("obj-send", "Send", [548, 90, 48, 18], longname="Send", varname="send")
+    p.textbutton("obj-refresh", "Refresh", [600, 90, 48, 18], longname="Refresh", varname="refreshbtn")
+    p.textbutton("obj-capture", "FX Capture", [652, 90, 48, 18], longname="FX Capture", varname="fxcapture")
+    p.comment("obj-l-midich", "MIDI Ch", [548, 112, 40, 12], 8.0)
+    p.numbox("obj-midich", "MIDI Ch", [548, 126, 36, 15], initial=1, lo=1, hi=16, shortname="MIDICh", varname="midich")
+    p.comment("obj-l-bus", "Bus", [590, 112, 36, 12], 8.0)
+    p.numbox("obj-bus", "Bus", [590, 126, 36, 15], initial=1, lo=1, hi=4, varname="bus")
+    p.comment("obj-l-main", "Main", [640, 112, 60, 12], 8.0)
+    p.dial("obj-vmain", "Main Volume", [640, 126, 60, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
+    p.boxes[-1]["showname"] = 0
     subscribe.append("subscribe vmain")
-    # the fx banks (V5.0: by group name)
+    # the fx banks (V5.0: by group name), 70x40 as in V4.3, in two rows
     for i, key in enumerate(FX_KEYS):
-        x = 712 + 44 * i
-        p.comment("obj-lfx-" + key, key, [x, 14, 42, 11], 8.0)
-        p.box("obj-" + key, "multislider", rect=[x, 26, 40, 80], parameter_enable=1, numinlets=1, numoutlets=2, outlettype=["", ""],
+        col, row = i % 5, i // 5
+        x, y = 712 + 74 * col, 4 + 68 * row
+        p.comment("obj-lfx-" + key, key, [x, y, 70, 12], 8.0)
+        p.box("obj-" + key, "multislider", rect=[x, y + 14, 70, 40], parameter_enable=1, numinlets=1, numoutlets=2, outlettype=["", ""],
               saved_attribute_attributes={"valueof": {"parameter_invisible": 1, "parameter_longname": key + "_fx", "parameter_modmode": 0,
                                                       "parameter_shortname": key + "_fx", "parameter_type": 3}},
               setminmax=[0.0, 127.0], setstyle=1, size=9, varname=key + "_fx")

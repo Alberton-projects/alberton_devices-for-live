@@ -607,6 +607,7 @@ function applyFX(fxKey, values) {
                 warn("recall of " + fxKey + " fx: the [FX] rack is gone (send refresh)");
                 return;
             }
+            if (api.get("is_enabled") == 0) continue;   // a hidden macro is disabled: skip it quietly
             api.set("value", values[i]);
         }
     });

@@ -282,6 +282,7 @@ function applyFX(key, values) {
                 warn("the [FX] rack of " + key + " is gone (send refresh)");
                 return;
             }
+            if (api.get("is_enabled") == 0) continue;   // a hidden macro is disabled: skip it quietly
             api.set("value", values[i]);
         }
     });

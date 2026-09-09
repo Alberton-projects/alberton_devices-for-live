@@ -181,6 +181,25 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   all hold together end to end. The kit grid, the labels and the MIDI recall need hands and
   eyes: the owner's.
 
+- **The 800 "parameter is disabled" errors a day, solved.** Live's `Log.txt` (which carries
+  every Max window line as "Message from Max") shows bursts of eight at each kit recall. The
+  Vocals track's `[FX] Alberton per Track-1` rack has four disabled macros (LP/HP FILTER,
+  REPEAT, DROP REPEAT, PING PONG: mapped elsewhere, so Live refuses writes), and V4.3 applies
+  every fx bank twice per recall, once from the multislider's output and once from its
+  `pattr @bindto`. Four times two. Both scripts now skip a disabled macro quietly; the double
+  apply is harmless and stays in V5.0.
+- **A track must be armed or monitoring In for a device to receive MIDI.** The V5 panel on a
+  fresh test track (monitor Auto, not armed) never saw the controller's program changes while
+  V4.3 on MIDI REC (monitor In) recalled kits from them; armed, the V5 panel recalled kit 1
+  from PC 0. MIDI REC is set to In for exactly that reason.
+- **`live.dial` is taller than it looks in the JSON.** A tiny dial with its name shown takes
+  about 30 px and two of them per strip overlapped the row below, and a 40 px multislider
+  with nine bars is unusable. Strip dials now hide their names (`showname 0`), rows are 78 px
+  apart, and the fx banks are 70×40 as in V4.3, in two rows.
+- **`song_batch` with three appended tracks** did not leave them named in call order (track 29
+  came out as "V5 B"); renamed afterwards. Name tracks after creating them one at a time, or
+  read the names back before using indices.
+
 ## Not yet verified
 
 

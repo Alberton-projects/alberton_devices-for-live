@@ -27,6 +27,10 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-09** — The August "parameter is disabled" mystery solved from Live's log: four
+  disabled macros on the Vocals [FX] rack, written twice per recall; both scripts skip disabled
+  macros. V5 panel layout redone after a screenshot; MIDI recall verified by the owner with the
+  test track armed.
 - **2026-09-09** — Alberton Kit Selector V5 panel built (`54e0023`): generated patcher, seven
   tests, the bus verified end to end with two receivers on test tracks (HANDOFF).
 - **2026-09-09** — Alberton Kit Receiver built (`3d5649a`): generated patcher, ten tests, every
