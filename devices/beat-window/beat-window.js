@@ -1,14 +1,18 @@
 // Beat Window — the floating display, drawn with mgraphics in a jsui.
 //
-// It receives three messages from the device patcher and draws them; it owns no timing but
+// It receives five messages from the device patcher and draws them; it owns no timing but
 // the length of its own pulse.
 //   beat <bar> <beat>   the transport position, both 1-based; a new beat pulses the ring
+//   tempo <bpm>         Live's tempo, quarter notes per minute
+//   sig <num> <den>     the time signature
 //   flash <0|1>         whether a new beat should pulse
-//   blink <ms>          how long the pulse stays on
+//   blink <percent>     how long the pulse stays on, as a share of the beat (5..90)
 //
 // The look is the original's: a warm digit, large and centred, on a dark disc, with the
-// bar.beat position beneath it. A ring around the disc lights on the beat for `blink` ms.
-// The pulse is square, not a fade, and it does not go out until paint() has drawn it once:
+// bar.beat position beneath it. A ring around the disc lights on the beat for a share of the
+// beat's length (60000 / bpm * 4 / den ms), so it adapts to tempo and signature and can never
+// stay on into the next beat. The pulse is square, not a fade, and it does not go out until
+// paint() has drawn it once:
 // Live repaints a floating window only some ten to fifteen times a second, so a short fade
 // was usually first painted when already dim, and a beat could pass unseen. The drawing
 // reads its size from the box every paint, so it rescales with the window (the patcher
@@ -22,7 +26,9 @@ mgraphics.autofill = 0;
 var curBar = 0, curBeat = 0;     // current position, 1-based; 0 before the first message
 var lastBeat = -1;               // to notice a new beat
 var flashEnabled = 1;
-var blinkMs = 120;
+var blinkPct = 25;               // the pulse, as a share of the beat
+var tempoBpm = 120, sigDen = 4;  // Live's tempo and signature denominator, until told
+var MIN_PULSE_MS = 20;
 var pulseOn = 0;                 // 1 while the ring shows
 var pulseSeen = 0;               // paint() sets it once it has drawn the ring
 var HOLD_MS = 33;                // how much longer to keep a ring that has not been painted yet
@@ -52,7 +58,12 @@ function flash(on) {
     if (!flashEnabled) { pulseOn = 0; off.cancel(); mgraphics.redraw(); }
 }
 
-function blink(ms) { blinkMs = Math.max(1, ms); }
+function blink(pct) { blinkPct = Math.min(90, Math.max(1, pct)); }
+function tempo(bpm) { if (bpm > 0) tempoBpm = bpm; }
+function sig(num, den) { if (den > 0) sigDen = den; }
+
+function beatMs() { return 60000 / tempoBpm * 4 / sigDen; }
+function pulseMs() { return Math.max(MIN_PULSE_MS, beatMs() * blinkPct / 100); }
 
 // ---- the pulse: on at the beat, off after blink ms, never before it was painted ----
 
@@ -60,7 +71,7 @@ function startPulse() {
     pulseOn = 1;
     pulseSeen = 0;
     off.cancel();
-    off.schedule(blinkMs);
+    off.schedule(pulseMs());
 }
 
 function pulseOff() {

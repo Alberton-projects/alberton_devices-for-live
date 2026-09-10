@@ -22,21 +22,35 @@ test('a new beat lights the ring; the same beat polled again does not restart it
   assert.equal(d.ctx.mgraphics.redraws, 2);
 });
 
-test('the pulse goes out after blink ms once it has been painted', () => {
-  const d = boot();
-  d.send('blink', 100);
+test('the pulse is a share of the beat: 25% of a 500 ms beat is 125 ms', () => {
+  const d = boot();                        // 120 bpm, 4/4 until told otherwise
+  d.send('blink', 25);
+  assert.equal(d.ctx.beatMs(), 500);
+  assert.equal(d.ctx.pulseMs(), 125);
   d.send('beat', 1, 1);
   d.paint();                               // Live painted it
-  d.Task.advance(90);
-  assert.equal(d.ctx.pulseOn, 1, 'still on before blink ms');
+  d.Task.advance(115);
+  assert.equal(d.ctx.pulseOn, 1, 'still on before its time');
   d.Task.advance(20);
-  assert.equal(d.ctx.pulseOn, 0, 'off after blink ms');
+  assert.equal(d.ctx.pulseOn, 0, 'off after it');
   assert.equal([...d.Task.pending].length, 0, 'nothing left scheduled');
+});
+
+test('tempo and signature shape the beat: 12/8 at 110 bpm is a 273 ms beat, so 25% is 68 ms', () => {
+  const d = boot();
+  d.send('tempo', 110);
+  d.send('sig', 12, 8);
+  assert.equal(Math.round(d.ctx.beatMs()), 273);
+  assert.equal(Math.round(d.ctx.pulseMs()), 68);
+  d.send('blink', 90);                     // the longest allowed still ends before the next beat
+  assert.ok(d.ctx.pulseMs() < d.ctx.beatMs());
+  d.send('blink', 300);                    // out of range is clamped
+  assert.equal(d.ctx.blinkPct, 90);
 });
 
 test('a pulse that was never painted stays on until it is, then goes out', () => {
   const d = boot();
-  d.send('blink', 100);
+  d.send('blink', 20);                     // 100 ms of a 500 ms beat
   d.send('beat', 1, 1);
   d.Task.advance(400);                     // no paint happened for a long time
   assert.equal(d.ctx.pulseOn, 1, 'held on: nobody has seen it yet');

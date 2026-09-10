@@ -238,9 +238,9 @@ def beat_window():
     p.comment("obj-title", "Beat Window", [8, 4, 140, 16])
     p.toggle("obj-flash", "Flash", [8, 30, 18, 18], initial=1, varname="flash")
     p.comment("obj-l-flash", "Flash", [30, 32, 60, 14], 9.0)
-    # a float parameter: an int parameter in Live has 256 steps at most (10..265 here); unit 2 shows time
-    p.numbox("obj-blink", "Blink", [8, 58, 56, 16], initial=120, lo=10, hi=1000, unit=2, shortname="Blink", varname="blink", is_float=True)
-    p.comment("obj-l-blink", "Blink (ms)", [64, 60, 80, 14], 9.0)
+    # the pulse as a share of the beat (unit 5 shows %), so it follows tempo and signature
+    p.numbox("obj-blink", "Blink", [8, 58, 44, 16], initial=25, lo=5, hi=90, unit=5, shortname="Blink", varname="blink")
+    p.comment("obj-l-blink", "Blink, % of beat", [56, 60, 76, 14], 9.0)
     p.toggle("obj-float", "Float Window", [8, 86, 18, 18], initial=1, shortname="Float", varname="float")
     p.comment("obj-l-float", "Window", [30, 88, 80, 14], 9.0)
     # the same drawing, small, on the device face: the beat is visible with the window closed
@@ -252,8 +252,8 @@ def beat_window():
     p.line("obj-pin", 0, "obj-pout", 0)
     p.line("obj-pin", 1, "obj-pout", 1)
 
-    # timing: a metro (gated by Float) bangs transport; a bang polls, it does not start Live
-    p.newobj("obj-metro", "metro 33", [40, 200])
+    # timing: a metro bangs transport every 33 ms; a bang polls, it does not start Live
+    p.newobj("obj-metro", "metro 33 @active 1", [40, 200])
     p.newobj("obj-transport", "transport", [40, 232], n_in=2, n_out=9, outlettype=[""] * 9)
     p.newobj("obj-pack", "pack 0 0", [40, 264], n_in=2)
     p.newobj("obj-prep-beat", "prepend beat", [40, 296])
@@ -261,13 +261,16 @@ def beat_window():
     p.line("obj-transport", 0, "obj-pack", 0)     # Bars (fires last) triggers
     p.line("obj-transport", 1, "obj-pack", 1)     # Beats (fires first) sets the cold inlet
     p.line("obj-pack", 0, "obj-prep-beat", 0)
+    p.newobj("obj-prep-tempo", "prepend tempo", [40, 328])       # the pulse length follows the tempo
+    p.newobj("obj-prep-sig", "prepend sig", [40, 360])           # and the signature (a 12/8 beat is an eighth)
+    p.line("obj-transport", 4, "obj-prep-tempo", 0)
+    p.line("obj-transport", 5, "obj-prep-sig", 0)
 
-    # Float toggle: run the metro, and open/close the window through pcontrol
+    # Float toggle: open/close the window through pcontrol
     p.newobj("obj-sel", "sel 0 1", [240, 168], n_out=3, outlettype=["", "", ""])
     p.message("obj-close", "close", [240, 200])
     p.message("obj-open", "open", [290, 200])
     p.newobj("obj-pctl", "pcontrol", [240, 232], n_out=1)
-    p.line("obj-float", 0, "obj-metro", 0)
     p.line("obj-float", 0, "obj-sel", 0)
     p.line("obj-sel", 0, "obj-close", 0)
     p.line("obj-sel", 1, "obj-open", 0)
@@ -346,7 +349,7 @@ def beat_window():
     p.boxes[-1]["patcher"]["bgcolor"] = [0.105, 0.117, 0.149, 1.0]
     p.boxes[-1]["patcher"]["editing_bgcolor"] = [0.105, 0.117, 0.149, 1.0]
     p.line("obj-pctl", 0, "obj-disp", 0)          # pcontrol identifies the window
-    for src in ("obj-prep-beat", "obj-prep-flash", "obj-prep-blink"):
+    for src in ("obj-prep-beat", "obj-prep-tempo", "obj-prep-sig", "obj-prep-flash", "obj-prep-blink"):
         p.line(src, 0, "obj-disp", 1)
         p.line(src, 0, "obj-mini", 0)
 
