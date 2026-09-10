@@ -210,7 +210,21 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   with "The given Track is invisible". Unfold the group (`fold_state` false), load, fold it
   back. Live puts a MIDI effect loaded this way before the track's instrument by itself.
 
+- **Kits migrated through the set file** (2026-09-10). A device's blob parameters travel in
+  the `.als` as one hex-encoded, NUL-terminated JSON text: for the Kit Selector, the
+  pattrstorage with its slots plus the fx multisliders. V4.3 held **twelve** kits, not
+  thirty-two (slots 1–11 and 32, all named); its fx banks were stored under the auto-named
+  `pattr @bindto` clients, and its resample bank never at all. `tools/migrate_kits.py`
+  translated them into the V5 panel's names and replaced the V5 device's blob with Live
+  closed; the rewritten set was checked identical to the original outside that blob. Live's
+  own gzip is looser than Python's: the file shrank by a tenth with nothing lost.
+- **A parameter-enabled multislider is not a pattrstorage client**: its `pattr @bindto` is.
+  The V5 panel subscribes `pattr_<bank>`; subscribing the multislider stored nothing.
+
 ## Not yet verified
+
+- The migrated kits on the set: recall "Tabú" and read the four drum chain selectors at 9,
+  Bass Synth 24, Pad 2 16, Lead 1 74, Lead 2 1 on the receivers.
 
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

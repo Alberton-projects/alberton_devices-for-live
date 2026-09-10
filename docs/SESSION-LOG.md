@@ -27,6 +27,9 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — The twelve V4.3 kits migrated into the V5 panel through the set file
+  (`bb18efd`, `tools/migrate_kits.py`), original kept as `.pre-migrate-20260910-134708`.
+  Verification on reopening pending.
 - **2026-09-10** — Kit Receivers on fourteen tracks of the real set, beside the old PC Receivers:
   strips 1–4 Kick, Snare, HiHat, Cymbals (Macro 1), 5–12 Bass Electric, Bass Synth, Pad 1, Pad 2,
   Piano 1, Piano 2, Lead 1, Lead 2 (Program Change), 13–14 Vocoder and Live Scratcher (None).
