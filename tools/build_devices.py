@@ -121,7 +121,7 @@ def kit_selector_v5():
               setminmax=[0.0, 127.0], setstyle=1, size=9, varname=key + "_fx")
         p.params["obj-" + key] = [key + "_fx", key + "_fx", 0]
         p.box("obj-pattr-" + key, "newobj", rect=[900 + 60 * i, 700, 200, 20], presentation=False,
-              text="pattr @bindto %s_fx @autorestore 1" % key, numinlets=1, numoutlets=3, outlettype=["", "", ""],
+              text="pattr pattr_%s @bindto %s_fx @autorestore 1" % (key, key), numinlets=1, numoutlets=3, outlettype=["", "", ""],
               saved_object_attributes={"parameter_enable": 0, "parameter_mappable": 0}, varname="pattr_" + key)
         p.newobj("obj-pfx-" + key, "prepend %s_fx" % key, [900 + 60 * i, 740])
         p.line("obj-" + key, 0, "obj-pfx-" + key, 0)            # a slider edited by hand
