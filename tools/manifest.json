@@ -50,6 +50,11 @@
       "dir": "tempo-automator",
       "file": "Alberton Dummy Tempo Automator.amxd",
       "install": "Presets/MIDI Effects/Max MIDI Effect/Alberton Dummy Tempo Automator.amxd"
+    },
+    {
+      "dir": "beat-window",
+      "file": "Alberton Beat Window.amxd",
+      "install": "Presets/Audio Effects/Max Audio Effect/Alberton Beat Window.amxd"
     }
   ]
 }

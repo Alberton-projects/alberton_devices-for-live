@@ -70,6 +70,27 @@ class Patcher:
                         text="js " + filename, numinlets=n_in, numoutlets=n_out, outlettype=[""] * n_out,
                         saved_object_attributes={"filename": filename, "parameter_enable": 0})
 
+    def jsui(self, oid, filename, rect, varname, presentation=False):
+        """An mgraphics drawing surface. `filename` is a box attribute, so it is a dependency
+        (`scripts_used` reads it) and gets embedded like a `js` script at release."""
+        return self.box(oid, "jsui", rect=rect, presentation=presentation, filename=filename,
+                        numinlets=1, numoutlets=1, outlettype=[""], parameter_enable=0, varname=varname)
+
+    def subpatcher(self, oid, name, at, boxes, lines, openrect, n_in, n_out=0, openinpresentation=0):
+        """A `p <name>` box carrying its own patcher. `boxes` are raw box dicts; `lines` are
+        (src, out, dst, inlet) tuples in the child's own id space."""
+        sub = {
+            "fileversion": 1,
+            "appversion": {"major": 9, "minor": 0, "revision": 9, "architecture": "x64", "modernui": 1},
+            "classnamespace": "box", "rect": [0.0, 0.0, 640.0, 480.0],
+            "openrect": [float(v) for v in openrect], "openinpresentation": openinpresentation,
+            "default_fontsize": 10.0, "default_fontname": "Arial", "gridsize": [8.0, 8.0],
+            "boxes": [{"box": b} for b in boxes],
+            "lines": [{"patchline": {"destination": [d, i], "source": [s, o]}} for (s, o, d, i) in lines],
+        }
+        return self.box(oid, "newobj", rect=[at[0], at[1], 20 + 6.5 * len(name), 20], presentation=False,
+                        text="p " + name, numinlets=n_in, numoutlets=n_out, outlettype=[""] * n_out, patcher=sub)
+
     def _param(self, oid, maxclass, longname, shortname, rect, valueof, varname, numoutlets, outlettype, **extra):
         v = {"parameter_longname": longname, "parameter_shortname": shortname or longname, "parameter_modmode": 0}
         v.update(valueof)

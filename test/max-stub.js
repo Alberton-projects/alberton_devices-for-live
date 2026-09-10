@@ -114,12 +114,32 @@ function load(device, script, opts = {}) {
     // patcher.getnamed(varname).getvalueof(): the controls a test declares in opts.controls
     patcher: { getnamed: (name) => (opts.controls && name in opts.controls) ? { getvalueof: () => opts.controls[name] } : null },
     LiveAPI: makeLiveAPI(opts.live || {}, liveLog, posts),
-    Math, parseInt, parseFloat, String, Number, Array, Object, isNaN,
+    Math, parseInt, parseFloat, String, Number, Array, Object, isNaN, Date,
   };
+  // A jsui script (mgraphics) needs a drawing context and a box to read its size from. These
+  // record rather than draw, so the script loads under Node and paint() runs for coverage while
+  // a test reads the recorded calls (`draws`) or the script's own state through `ctx`.
+  const draws = [];
+  const rec = (name) => (...a) => draws.push([name].concat(Array.from(a)));
+  ctx.mgraphics = {
+    init() {}, relative_coords: 0, autofill: 0, redraws: 0,
+    redraw() { this.redraws += 1; },
+    set_source_rgba: rec('rgba'), rectangle: rec('rect'), ellipse: rec('ellipse'),
+    fill: rec('fill'), stroke: rec('stroke'), set_line_width: rec('lw'),
+    select_font_face: rec('font'), set_font_size: rec('size'), move_to: rec('move'),
+    show_text: rec('text'), text_measure: (s) => [String(s).length * 8, 12],
+  };
+  ctx.sketch = { default2d() {} };
+  ctx.jsarguments = opts.jsarguments || [];
+  ctx.box = { rect: (opts.boxRect || [0, 0, 260, 240]).slice() };
+  ctx.draws = draws;
   vm.createContext(ctx);
+  // In vm.runInContext top-level `this` is the sandbox, so `this.box` a jsui reads is ctx.box.
   vm.runInContext(code, ctx, { filename: script });
   return {
-    ctx, out, posts, liveLog, Task: FakeTask,
+    ctx, out, posts, liveLog, draws, Task: FakeTask,
+    // paint() reads `this.box`; call it with `this` bound to the sandbox, as Max does.
+    paint() { ctx.inlet = 0; return ctx.paint.call(ctx); },
     // Call a script function the way Max does, on a given inlet.
     send(fn, ...args) { ctx.inlet = 0; return ctx[fn](...args); },
     sendOn(inletIndex, fn, ...args) { ctx.inlet = inletIndex; return ctx[fn](...args); },

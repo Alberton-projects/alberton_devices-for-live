@@ -50,15 +50,22 @@ def patcher_of(doc):
 
 
 def scripts_used(patcher):
-    """Every `js <file>` referenced anywhere in the patcher, in order of appearance."""
+    """Every script referenced anywhere in the patcher, in order of appearance: a `js <file>`
+    object's argument, and a `jsui` box's `filename` (subpatchers are walked too)."""
     found = []
+
+    def add(name):
+        if name and name not in found:
+            found.append(name)
 
     def walk(p):
         for b in p.get("boxes", []):
             bb = b["box"]
             m = re.match(r'\s*js\s+(\S+)', bb.get("text") or "")
-            if m and m.group(1) not in found:
-                found.append(m.group(1))
+            if m:
+                add(m.group(1))
+            if bb.get("maxclass") == "jsui":
+                add(bb.get("filename"))
             if "patcher" in bb:
                 walk(bb["patcher"])
     walk(patcher)

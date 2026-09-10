@@ -223,7 +223,129 @@ def kit_fx_receiver():
     print("  %-32s %6d bytes" % (os.path.basename(path), len(data)))
 
 
-BUILDERS = {"kit-receiver": kit_receiver, "kit-selector-v5": kit_selector_v5, "kit-fx-receiver": kit_fx_receiver}
+def beat_window():
+    """An audio effect that shows the beat in a floating, resizable window.
+
+    The device passes audio through and, every 33 ms, banging `transport` reads the bar and beat
+    (a bang polls; it never starts Live's transport). Those go to a `jsui` inside a subpatcher
+    whose own `thispatcher` makes its window float and grow and, by polling `window getsize`,
+    resizes the `jsui` box to the window so the drawing rescales. `pcontrol` opens and closes
+    that window from the Float toggle. Blink (ms) and Flash (on/off) are passed to the drawing.
+    """
+    folder = os.path.join(ROOT, "devices", "beat-window")
+    p = Patcher("audio", 244, 128)
+    # the device face: the three controls
+    p.comment("obj-title", "Beat Window", [8, 4, 140, 16])
+    p.toggle("obj-flash", "Flash", [8, 30, 18, 18], initial=1, varname="flash")
+    p.comment("obj-l-flash", "Flash", [30, 32, 60, 14], 9.0)
+    p.numbox("obj-blink", "Blink", [8, 58, 52, 16], initial=120, lo=10, hi=1000, shortname="Blink", varname="blink")
+    p.comment("obj-l-blink", "Blink (ms)", [64, 60, 80, 14], 9.0)
+    p.toggle("obj-float", "Float Window", [8, 86, 18, 18], initial=1, shortname="Float", varname="float")
+    p.comment("obj-l-float", "Window", [30, 88, 80, 14], 9.0)
+
+    # audio straight through, so the device is silent to the signal but does not break the chain
+    p.newobj("obj-pin", "plugin~", [520, 200], n_in=0, n_out=2, outlettype=["signal", "signal"])
+    p.newobj("obj-pout", "plugout~", [520, 260], n_in=2, n_out=0, outlettype=[])
+    p.line("obj-pin", 0, "obj-pout", 0)
+    p.line("obj-pin", 1, "obj-pout", 1)
+
+    # timing: a metro (gated by Float) bangs transport; a bang polls, it does not start Live
+    p.newobj("obj-metro", "metro 33", [40, 200])
+    p.newobj("obj-transport", "transport", [40, 232], n_in=2, n_out=9, outlettype=[""] * 9)
+    p.newobj("obj-pack", "pack 0 0", [40, 264], n_in=2)
+    p.newobj("obj-prep-beat", "prepend beat", [40, 296])
+    p.line("obj-metro", 0, "obj-transport", 0)
+    p.line("obj-transport", 0, "obj-pack", 0)     # Bars (fires last) triggers
+    p.line("obj-transport", 1, "obj-pack", 1)     # Beats (fires first) sets the cold inlet
+    p.line("obj-pack", 0, "obj-prep-beat", 0)
+
+    # Float toggle: run the metro, and open/close the window through pcontrol
+    p.newobj("obj-sel", "sel 0 1", [240, 168], n_out=3, outlettype=["", "", ""])
+    p.message("obj-close", "close", [240, 200])
+    p.message("obj-open", "open", [290, 200])
+    p.newobj("obj-pctl", "pcontrol", [240, 232], n_out=1)
+    p.line("obj-float", 0, "obj-metro", 0)
+    p.line("obj-float", 0, "obj-sel", 0)
+    p.line("obj-sel", 0, "obj-close", 0)
+    p.line("obj-sel", 1, "obj-open", 0)
+    p.line("obj-close", 0, "obj-pctl", 0)
+    p.line("obj-open", 0, "obj-pctl", 0)
+
+    # Flash and Blink to the drawing
+    p.newobj("obj-prep-flash", "prepend flash", [120, 296])
+    p.newobj("obj-prep-blink", "prepend blink", [180, 296])
+    p.line("obj-flash", 0, "obj-prep-flash", 0)
+    p.line("obj-blink", 0, "obj-prep-blink", 0)
+
+    # push the controls to the drawing and open the window once, after Live restores the params
+    p.newobj("obj-load", "loadbang", [400, 140], n_in=0)
+    p.newobj("obj-ld", "delay 500", [400, 168])
+    p.newobj("obj-lt", "t b b b", [400, 200], n_in=1, n_out=3, outlettype=["bang", "bang", "bang"])
+    p.line("obj-load", 0, "obj-ld", 0)
+    p.line("obj-ld", 0, "obj-lt", 0)
+    p.line("obj-lt", 2, "obj-flash", 0)     # bang re-outputs each control's current value
+    p.line("obj-lt", 1, "obj-blink", 0)
+    p.line("obj-lt", 0, "obj-float", 0)
+
+    # the floating window: a subpatcher holding the jsui and its own window management
+    JS = "beat-window.js"
+    sub = [
+        {"id": "s-inctl", "maxclass": "inlet", "index": 1, "comment": "open/close (pcontrol)",
+         "numinlets": 0, "numoutlets": 1, "outlettype": [""], "patching_rect": [20, 360, 24, 24]},
+        {"id": "s-indata", "maxclass": "inlet", "index": 2, "comment": "beat / flash / blink",
+         "numinlets": 0, "numoutlets": 1, "outlettype": [""], "patching_rect": [60, 360, 24, 24]},
+        {"id": "s-load", "maxclass": "newobj", "text": "loadbang", "numinlets": 1, "numoutlets": 1,
+         "outlettype": [""], "patching_rect": [120, 360, 60, 20]},
+        {"id": "s-setup", "maxclass": "message",
+         "text": "title Beat, window flags float, window exec, window grow",
+         "numinlets": 2, "numoutlets": 1, "outlettype": [""], "patching_rect": [120, 392, 320, 20]},
+        {"id": "s-metro", "maxclass": "newobj", "text": "metro 250 @active 1", "numinlets": 2, "numoutlets": 1,
+         "outlettype": [""], "patching_rect": [120, 424, 120, 20]},
+        {"id": "s-getsize", "maxclass": "message", "text": "window getsize", "numinlets": 2, "numoutlets": 1,
+         "outlettype": [""], "patching_rect": [120, 456, 100, 20]},
+        {"id": "s-tp", "maxclass": "newobj", "text": "thispatcher", "numinlets": 1, "numoutlets": 2,
+         "outlettype": ["", ""], "patching_rect": [120, 520, 80, 20]},
+        {"id": "s-rw", "maxclass": "newobj", "text": "route window", "numinlets": 2, "numoutlets": 2,
+         "outlettype": ["", ""], "patching_rect": [300, 456, 90, 20]},
+        {"id": "s-rs", "maxclass": "newobj", "text": "route size", "numinlets": 2, "numoutlets": 2,
+         "outlettype": ["", ""], "patching_rect": [300, 484, 80, 20]},
+        {"id": "s-un", "maxclass": "newobj", "text": "unpack 0 0 0 0", "numinlets": 1, "numoutlets": 4,
+         "outlettype": ["", "", "", ""], "patching_rect": [300, 512, 100, 20]},
+        {"id": "s-ew", "maxclass": "newobj", "text": "expr $i3 - $i1", "numinlets": 3, "numoutlets": 1,
+         "outlettype": [""], "patching_rect": [300, 540, 100, 20]},
+        {"id": "s-eh", "maxclass": "newobj", "text": "expr $i3 - $i1", "numinlets": 3, "numoutlets": 1,
+         "outlettype": [""], "patching_rect": [410, 540, 100, 20]},
+        {"id": "s-sp", "maxclass": "newobj", "text": "sprintf script size beatui %ld %ld", "numinlets": 2,
+         "numoutlets": 1, "outlettype": [""], "patching_rect": [300, 568, 220, 20]},
+        # the drawing surface, last so it paints on top of the plumbing; sized to the window
+        {"id": "s-ui", "maxclass": "jsui", "filename": JS, "varname": "beatui", "parameter_enable": 0,
+         "numinlets": 1, "numoutlets": 1, "outlettype": [""], "patching_rect": [0, 0, 244, 220]},
+    ]
+    sub_lines = [
+        ("s-indata", 0, "s-ui", 0),
+        ("s-load", 0, "s-setup", 0), ("s-setup", 0, "s-tp", 0),
+        ("s-metro", 0, "s-getsize", 0), ("s-getsize", 0, "s-tp", 0),
+        ("s-tp", 0, "s-rw", 0), ("s-rw", 0, "s-rs", 0), ("s-rs", 0, "s-un", 0),
+        ("s-un", 0, "s-ew", 0), ("s-un", 2, "s-ew", 2),      # width  = right - left
+        ("s-un", 1, "s-eh", 0), ("s-un", 3, "s-eh", 2),      # height = bottom - top
+        ("s-ew", 0, "s-sp", 0), ("s-eh", 0, "s-sp", 1),      # width triggers (fires last), height is cold
+        ("s-sp", 0, "s-tp", 0),
+    ]
+    p.subpatcher("obj-disp", "display", [240, 296], sub, sub_lines, openrect=[80, 80, 244, 220], n_in=2)
+    p.line("obj-pctl", 0, "obj-disp", 0)          # pcontrol identifies the window
+    p.line("obj-prep-beat", 0, "obj-disp", 1)
+    p.line("obj-prep-flash", 0, "obj-disp", 1)
+    p.line("obj-prep-blink", 0, "obj-disp", 1)
+
+    with open(os.path.join(folder, JS), "rb") as f:
+        script = f.read()
+    path = os.path.join(folder, "Alberton Beat Window.amxd")
+    data = p.write(path, scripts={JS: script})
+    print("  %-32s %6d bytes" % (os.path.basename(path), len(data)))
+
+
+BUILDERS = {"kit-receiver": kit_receiver, "kit-selector-v5": kit_selector_v5,
+            "kit-fx-receiver": kit_fx_receiver, "beat-window": beat_window}
 
 if __name__ == "__main__":
     for name in (sys.argv[1:] or BUILDERS):
