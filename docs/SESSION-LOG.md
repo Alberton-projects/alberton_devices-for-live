@@ -18,17 +18,17 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 3 done 2026-09-10 (HANDOFF): the Beat Window is on Main in place of the old VisualBeat. Phases 0 to 4 complete; only Phase 5, publication, remains. |
+| Phase | 5, publication, done 2026-09-10 in the evening: the repository is `github.com/Alberton-projects/alberton_devices-for-live`. All phases complete. |
 | What the set holds now | **The switch is done (2026-09-10).** The V5 panel sits on MIDI REC (monitor In) with the twelve migrated kits; V4.3, the seven old PC Receivers and the test track are gone from the set (files in `_archive/` and in git). A Kit Receiver on fourteen tracks (strips 1–14), a Kit FX Receiver on nine (banks 1–9), Apply Volume on everywhere except the Vocoder fx receiver (its volume is strip 13's). |
-| Open right now | Phase 5, publication (`docs/PLAN.md` §2). Live reloads a device's instances when its file changes (HANDOFF): save before any install; the vanishings stay unexplained. |
-| Installed form | **Release form, all eleven devices** (scripts embedded, no symlinks): ten installed 2026-09-10 20:09, the Beat Window 22:05. Development form only during a work session, and back to release before a show. |
-| Tests | 84 (`npm test`); `tools/check_embedded.py` passes for all eleven devices |
-| Published | **No.** Publication is the last phase. No remote is configured. |
+| Open right now | Nothing planned. Live reloads a device's instances when its file changes (HANDOFF): save before any install; the vanishings stay unexplained. |
+| Installed form | **Release form, the nine published devices** (scripts embedded, no symlinks): eight installed 2026-09-10 20:09, the Beat Window 22:05. V4.3 and the old PC Receiver stay installed in the User Library, used by no set, and left the repository tree at publication (history up to `d2e8f34`). Development form only during a work session, and back to release before a show. |
+| Tests | 67 (`npm test`); `tools/check_embedded.py` passes for the nine devices |
+| Published | **Yes**, 2026-09-10: `origin` is `github.com/Alberton-projects/alberton_devices-for-live`, public, MIT. |
 
 ### What is left
 
-1. Phase 5 publication: per-device READMEs, INSTALL, README.md and README.ca.md, the manifest
-   without V4.3 and the old PC Receiver, the GitHub repository from this folder.
+Nothing planned. If the set changes what it asks of a device, the README of that device and
+`docs/PROTOCOL.md` are the places to keep true.
 
 The set-reading tools of the test (kit checker, state reader, bus test) are in the MCP working
 directory, `_handoff-devices/tools-2026-09-10/`, because they carry the set's names.
@@ -39,6 +39,12 @@ directory, `_handoff-devices/tools-2026-09-10/`, because they carry the set's na
 
 ## Log
 
+- **2026-09-10** — Published. V4.3, its script, the old PC Receiver, their test and the
+  migration tool left the tree (history up to `d2e8f34`); PROTOCOL part B moved to
+  `docs/history/`; a README per device, `docs/INSTALL.md`, `README.md` and `README.ca.md`
+  written; CLAUDE.md brought up to date. Checks: `check_embedded` ok for nine devices,
+  `sync_shared --check` ok, 67 tests, `analyse.py` with known notes only. Repository created
+  from this folder with its whole history and pushed.
 - **2026-09-10** — Beat Window built from scratch (`f6a9381`, `7b136c3`, `df089b4`): audio
   effect, floating resizable window with an mgraphics jsui, a small copy on the device face.
   Three rounds with the owner fixed the uncovered plumbing (presentation window), the unseen

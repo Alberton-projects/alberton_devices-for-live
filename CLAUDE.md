@@ -47,22 +47,25 @@ appear here: not in code, not in constants, not in comments.
   device after it in the chain. Every MIDI device here passes MIDI through.
 - Live restores blob-typed state after ordinary parameters. State a script owns is reconciled
   after `live.thisdevice`, never on `loadbang`.
-- `autopattr @greedy 1` binds every named object: a new control in Kit Selector V4.3 becomes a
-  member of every saved kit. V4.3 gets no new controls; V5 uses subscribe mode.
+- `autopattr @greedy 1` binds every named object, so a new control becomes a member of every
+  saved preset; the Kit Selector's `pattrstorage` is in subscribe mode for that reason.
 - Renaming a Live parameter in a patcher loses its saved value in every set that uses the
   device (verified 2026-09-09 on the Drum Mapper's Mode). Parameters that carry state keep
   their names.
 - `LiveAPI.id` is the string `"0"` for a path that resolves to nothing. Test `api.id != 0`
   (the scripts' `exists()`), never truthiness.
-- Live reads a device file when the device is instantiated. A patcher edit needs the set
-  reloaded; a script edit does not when the device is installed in development form.
+- Live re-creates every instance of a device when its `.amxd` changes on disk, seconds to a few
+  minutes later, with the set open. Save the set before any install.
+- A `receive` with an argument has no inlet: to rename one from a script it must be created
+  without an argument and named by `set`.
+- An int parameter in Live has 256 steps at most; a wider range needs a float parameter.
 
 ## Environment (verified 2026-09-08)
 
-- macOS, Apple Silicon. Ableton Live 12.4.3 Suite, Max 9.0.9.
+- macOS, Apple Silicon. Ableton Live 12.4.3 Suite, Max 9.1.4.
 - User Library: `~/Music/Ableton/User Library/`. MIDI devices in `Presets/MIDI Effects/Max MIDI
-  Effect/`, the Gamepad in `Max for Live/`. Superseded files and dated backups in
-  `Presets/MIDI Effects/Max MIDI Effect/_archive/`.
+  Effect/`, audio devices in `Presets/Audio Effects/Max Audio Effect/`, the Gamepad in
+  `Max for Live/`. Superseded files and dated backups in an `_archive/` folder beside them.
 - The set: `~/Music/Ableton/User Library/Alberton Multiverse/Alberton Multiverse.als`, with
   `TGHC Song.als` beside it using the same devices.
 - Live is driven for verification through the Alberton MCP (`mcp__alberton__*` tools) or the

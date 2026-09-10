@@ -106,7 +106,7 @@ def kit_selector_v5():
     p.dial("obj-vmain", "Main Volume", [640, 138, 60, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
     p.boxes[-1]["showname"] = 0
     subscribe.append("subscribe vmain")
-    # the fx banks, 70x40 as in V4.3, in two rows, each with the volume of its track under it
+    # the fx banks, 70x40 as in the original panel, in two rows, each with the volume of its track under it
     for i, key in enumerate(FX_KEYS):
         col, row = i % 5, i // 5
         x, y = 796 + 74 * col, 4 + 80 * row

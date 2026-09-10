@@ -1,9 +1,9 @@
 # alberton_devices-for-live — work plan
 
-*Drafted 2026-09-08 from the handoff document, the August review in `amxd-tools/REVIEW.md`,
-the device files on disk and the loaded set; revised the same day with the owner's answers.
-Nothing in this plan has been built yet. The file moves to `docs/PLAN.md` when the repository
-is published, which is the last step, not the first.*
+*Drafted 2026-09-08 from the handoff document, the August review (now
+`docs/history/2026-08-04-review.md`), the device files on disk and the loaded set; revised the
+same day with the owner's answers. Kept as it was written, with a done marker on each phase:
+all five were completed by 2026-09-10.*
 
 ## 0. Decisions taken on 2026-09-08
 
@@ -133,7 +133,7 @@ The verification protocol in §5 runs in full on the set, with the owner playing
 Receiver are only removed from the set after V5.0 has passed it. Anything that fails goes back to
 its phase; nothing is published with an open failure.
 
-### Phase 5 — publication
+### Phase 5 — publication — done 2026-09-10
 
 Per-device README, `INSTALL.md`, top-level README in both languages, licence, the GitHub
 repository created from the working folder with its history, first push.

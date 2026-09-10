@@ -328,6 +328,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   form is installed. The downloaded `VisualBeat.amxd` went to `Max for Live/_archive/`;
   `Alberton VisualBeat.amxd` stays where it is because *TGHC Song.als* still references it.
 
+- **Published on 2026-09-10** as `github.com/Alberton-projects/alberton_devices-for-live`,
+  created from this folder with its whole history. What left the tree at that point, and lives
+  in the history up to `d2e8f34`: Kit Selector V4.3 with `live_controller.js`, the PC Kit
+  Selector Receiver, their tests and `tools/migrate_kits.py` (which needed V4.3's patcher).
+  The V4.3 protocol is `docs/history/2026-09-10-protocol-kit-selector-v4.3.md`. Both retired
+  devices stay installed in the author's User Library, used by no set.
+
 ## Not yet verified
 
 - The vanishings' mechanism (above): only the correlation with installs remains. Watch for
