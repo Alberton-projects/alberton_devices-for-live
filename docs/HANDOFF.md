@@ -252,5 +252,7 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 
 ## Not yet verified
 
-
-- The three Live checks the V5 design rests on (`docs/PLAN.md` §3).
+- The full test with audio (`docs/PLAN.md` §5) on the set after the switch, the owner playing.
+- The release form on the set: every device embedded (`tools/embed.py --write`,
+  `tools/check_embedded.py`, `tools/install.py --release`) and the set reopened on it.
+- The cause of the vanished receivers (above): open until it happens under observation.
