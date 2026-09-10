@@ -237,6 +237,13 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   or a mapped button) would remove exactly the last loads and writes, in reverse order, which
   matches what was seen. Open until it happens again under observation.
 
+- **V5.1 fx path, on the set** (2026-09-10, after a save and reopen so the panel carried its
+  fx pattrs named by argument and the channels as `forward` objects): FX Capture filled the
+  nine sliders from the racks through the receivers' `fxret`; recalling "Tabú" wrote the DRUMS
+  `[FX]` rack's Macro 1 to 114 and Macro 8 to 11 and Resample's Macro 1 to 64 — the migrated
+  kit's banks, through `fx` on the bus — while the drum chain selectors read 9. Kits, programs,
+  fx banks and the receivers hold together; only volumes stay switched off until the switch.
+
 ## Not yet verified
 
 

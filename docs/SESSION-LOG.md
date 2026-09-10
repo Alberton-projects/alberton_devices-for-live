@@ -20,7 +20,7 @@ HANDOFF, the design in PLAN.
 |---|---|
 | Phase | 2, generalisation (`docs/PLAN.md` §2). Bass Mapper, Drum Mapper, Transpose Q, Kit Receiver, Kit FX Receiver and the V5 panel are built, tested and installed. Phase 1 complete. |
 | What the set holds now | V4.3 still on MIDI REC with the seven old PC Receivers (active). The V5 panel on a test track "V5 panel" (monitor In) with the twelve migrated kits; a Kit Receiver on fourteen tracks (strips 1–14, Apply Volume off); a Kit FX Receiver on nine tracks (banks 1–9, Apply Volume off). Saved and reopened 2026-09-10 ~15:00 with the latest patchers. |
-| Open right now | verify the fx path after the reopen: FX Capture fills the sliders; recalling "Tabú" writes DRUMS `[FX]` Macro 1 = 114, Macro 8 = 11, Resample Macro 1 = 64. Then the switch (§ below). Devices that vanished three times, unexplained (HANDOFF). |
+| Open right now | the switch (§ below), then the full test with audio. The fx path is verified (HANDOFF). Devices that vanished three times, unexplained (HANDOFF). |
 | Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad`, Kit Receiver and Kit FX Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form. **Before any show: `python3 tools/install.py --release`.** |
 | Tests | 77 (`npm test`), `tools/check_embedded.py` fails on purpose mid-development |
 | Published | **No.** Publication is the last phase. No remote is configured. |
@@ -38,6 +38,8 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — V5.1 verified on the set: capture fills the sliders, "Tabú" drives the fx
+  racks and the drums through the receivers. Ready for the switch.
 - **2026-09-10** — Migration rerun with Live closed (idempotent: it rewrites the V5 blob from
   V4.3's): the resample bank at [64, 0…] and an fx volume per bank in every kit. Original kept as
   `.pre-migrate-20260910-140455`. Next: nine Kit FX Receivers on the set, then "Tabú" again.
