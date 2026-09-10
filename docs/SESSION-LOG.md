@@ -18,16 +18,17 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 4 done: the full test with audio passed on 2026-09-10 (HANDOFF). Phases 0, 1, 2 and 4 complete; Phase 3 (Beat Window) and Phase 5 (publication) remain. |
+| Phase | 3, the Beat Window: built 2026-09-10 in the evening, in its last round of checks with the owner (HANDOFF). Phases 0, 1, 2 and 4 complete; Phase 5 (publication) remains. |
 | What the set holds now | **The switch is done (2026-09-10).** The V5 panel sits on MIDI REC (monitor In) with the twelve migrated kits; V4.3, the seven old PC Receivers and the test track are gone from the set (files in `_archive/` and in git). A Kit Receiver on fourteen tracks (strips 1–14), a Kit FX Receiver on nine (banks 1–9), Apply Volume on everywhere except the Vocoder fx receiver (its volume is strip 13's). |
-| Open right now | Phase 3, the Beat Window; then Phase 5, publication. The vanishings have a probable cause (installs with the set open; HANDOFF): save before any install. |
-| Installed form | **Release form, all ten devices** (scripts embedded, no symlinks), installed 2026-09-10 20:09 and loaded by the set. Development form only during a work session, and back to release before a show. |
-| Tests | 77 (`npm test`); `tools/check_embedded.py` passes for all ten devices |
+| Open right now | the Beat Window's last checks, then its place on Main and the old VisualBeat to `_archive/`; then Phase 5, publication. Live reloads a device's instances when its file changes (HANDOFF): save before any install; the vanishings stay unexplained. |
+| Installed form | **Release form, the ten devices of the set** (scripts embedded, no symlinks), installed 2026-09-10 20:09 and loaded by the set; the Beat Window in development form while it is checked. Before a show: `install.py --release`. |
+| Tests | 84 (`npm test`); `tools/check_embedded.py` passes for all eleven devices |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
 ### What is left
 
-1. Phase 3 Beat Window (`docs/PLAN.md` §2).
+1. Beat Window: the owner's last checks, then on the Main track of the set in place of the old
+   VisualBeat, and both old files to `_archive/`.
 2. Phase 5 publication: per-device READMEs, INSTALL, README.md and README.ca.md, the manifest
    without V4.3 and the old PC Receiver, the GitHub repository from this folder.
 
@@ -40,6 +41,12 @@ directory, `_handoff-devices/tools-2026-09-10/`, because they carry the set's na
 
 ## Log
 
+- **2026-09-10** — Beat Window built from scratch (`f6a9381`, `7b136c3`, `df089b4`): audio
+  effect, floating resizable window with an mgraphics jsui, a small copy on the device face.
+  Three rounds with the owner fixed the uncovered plumbing (presentation window), the unseen
+  flash (square, paint-aware pulse), the 265 ms ceiling (an int parameter has 256 steps) and
+  the pulse sticking at fast beats (a share of the beat from tempo and signature). The old
+  VisualBeat is still on Main until the last checks pass.
 - **2026-09-10** — Full test with audio passed (HANDOFF): kits by grid and by program change,
   labels, Transpose Q, Gamepad, mappers, Tempo Automator, bus 2. Vocoder fx receiver found on
   bank 1, set to 7. Release form: `embed.py --write`, `check_embedded.py` ok for all ten,

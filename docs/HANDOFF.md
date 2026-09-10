@@ -296,18 +296,35 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   20:09:41, the Gamepad's menu restored ("Value 27 out of range for 'live.menu'", which
   otherwise appears only at a set load), the Live Scratcher chain re-applied and three Analog
   Lab V program lists re-scanned. The August note that Live only picks a change up at the
-  next instantiation was wrong. This is also the probable cause of the vanishings: every
-  episode sat in a window with installs of the very device that vanished, loaded from the
-  browser and not yet saved, while every saved instance survived. Rule: save the set before
-  any `install.py`, and expect the instances to reload by themselves.
+  next instantiation was wrong. Later the same evening the Beat Window, loaded from the browser
+  and never saved, was re-created twice by such reloads (21:28, 21:40) and stayed: so the reload
+  does not drop unsaved instances, and the vanishings are still unexplained. What remains true is
+  that every episode sat in a window with installs of the very device that vanished. Rule all
+  the same: save the set before any `install.py`, and expect the instances to reload by
+  themselves.
 - **Parameter values move while the owner plays.** After the tests the Live Scratcher's fader
   read 0.70 and the DRUMS rack's macro 1 read 66 where the kit says 0.36 and 114; the saved set
   already had the fader at −6 dB. Neither came from the devices; a recall or a Send puts them
   back, which is what a kit is for.
 
+- **Beat Window (Phase 3), built from scratch on 2026-09-10 in the evening and checked by the
+  owner on the set** (`tools/build_devices.py`, `devices/beat-window/`): the window opens from
+  the Float toggle, floats, resizes with its content, and shows nothing but the drawing once it
+  opens in presentation (in the patching view a resize uncovered the plumbing). Three things
+  learned on the way. *A short fade was mostly unseen*: Live repaints a floating window some ten
+  to fifteen times a second, so a 120 ms linear fade was first painted when already dim, while
+  265 ms was always seen; the pulse is square now and does not go out before `paint()` has
+  drawn it once. *An int parameter in Live has 256 steps at most*: a `live.numbox` declared
+  10..1000 stopped at 265. *A fixed pulse length sticks at fast beats*: at 12/8 and 110 bpm a
+  beat is 273 ms and a 300 ms pulse never went out; the pulse is a share of the beat now,
+  from the tempo and signature `transport` reports (60000 / bpm × 4 / den). A jsui's script
+  is its `filename` attribute, not a `js` argument; `scripts_used` reads both. Under Node the
+  stub gives a jsui `mgraphics`, a box and a `Date`, and `paint()` is exercised.
+
 ## Not yet verified
 
-- The vanishings' mechanism (above): the correlation with installs is strong, the reason a
-  browser-loaded instance is dropped by the reload is not known. Watch for it, and never
-  install with unsaved devices in the set.
-- The Beat Window (Phase 3), not built yet.
+- The vanishings' mechanism (above): only the correlation with installs remains. Watch for
+  it, and never install with unsaved devices in the set.
+- The Beat Window's last round (the pulse as a share of the beat, the device-face display with
+  the window closed) and its place on the Main track in the owner's set, then the old
+  VisualBeat files to `_archive/`.
