@@ -127,7 +127,7 @@ rescales with the window instead of sitting at a fixed size. Parameters: `Blink`
 (on/off), `Float` (open/close). Nothing from the downloaded `VisualBeat.amxd` is reused; both old
 files go to `_archive/` when this is done.
 
-### Phase 4 — the full test, audio on
+### Phase 4 — the full test, audio on — the switch to V5 was made 2026-09-10; the test is next
 
 The verification protocol in §5 runs in full on the set, with the owner playing. V4.3 and the old
 Receiver are only removed from the set after V5.0 has passed it. Anything that fails goes back to
