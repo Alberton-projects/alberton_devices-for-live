@@ -10,6 +10,10 @@ read out of the patchers on 2026-09-08 and still installed until the switch.
 decide what each message means there.** Every message travels on one Max `send` per bus,
 `ks<bus>` (Bus 1–4, a setting on every device, never part of a kit); answers travel on
 `ks<bus>_ret`. Max send names are global to the Live set, so a device on any track hears them.
+In the patchers the sending side is a `forward` object (a `send` would relay the `set` that
+names it) and the listening side a `receive` with no argument, named by the script with
+`set ks<bus>` at compile time and on every bus change: a `receive` with an argument has no
+inlet, so it could never be renamed.
 
 ### A.1 On the bus, from the panel
 
