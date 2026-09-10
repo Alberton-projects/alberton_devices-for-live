@@ -39,7 +39,9 @@ def kit_receiver():
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 300", [40, 270])
     p.message("obj-init", "init", [140, 270])
-    p.newobj("obj-recv", "r ks1", [300, 240], n_in=1, n_out=1)
+    # no argument on purpose: a receive with an argument has no inlet (Max deletes the cord at
+    # load), so the script names it with "set ks<bus>" at compile time and at every bus change
+    p.newobj("obj-recv", "receive", [300, 240], n_in=1, n_out=1)
     p.newobj("obj-ret", "forward", [300, 400], n_out=0, outlettype=[])
     for key in ("bus", "strip", "action", "applyvol"):
         p.newobj("obj-p-" + key, "prepend " + key, [500, 240 + 30 * ["bus", "strip", "action", "applyvol"].index(key)])
@@ -161,7 +163,7 @@ def kit_selector_v5():
     # the script, the bus, the buttons
     p.js("obj-js", "kit-selector.js", [40, 800], n_out=3)
     p.newobj("obj-send-obj", "forward", [40, 860], n_out=0, outlettype=[])
-    p.newobj("obj-ret", "r ks1_ret", [200, 760], n_in=1, n_out=1)
+    p.newobj("obj-ret", "receive", [200, 760], n_in=1, n_out=1)   # unnamed until the script's "set": with an argument it has no inlet
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 500", [40, 270])
     p.message("obj-init", "init", [140, 270])
@@ -200,7 +202,9 @@ def kit_fx_receiver():
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 300", [40, 270])
     p.message("obj-init", "init", [140, 270])
-    p.newobj("obj-recv", "r ks1", [300, 240], n_in=1, n_out=1)
+    # no argument on purpose: a receive with an argument has no inlet (Max deletes the cord at
+    # load), so the script names it with "set ks<bus>" at compile time and at every bus change
+    p.newobj("obj-recv", "receive", [300, 240], n_in=1, n_out=1)
     p.newobj("obj-ret", "forward", [300, 400], n_out=0, outlettype=[])
     for key in ("bus", "bank", "applyvol"):
         p.newobj("obj-p-" + key, "prepend " + key, [500, 240 + 30 * ["bus", "bank", "applyvol"].index(key)])

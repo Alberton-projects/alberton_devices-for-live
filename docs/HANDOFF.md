@@ -250,6 +250,21 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   numbers V4.3's `resetVolumes` used to force by name, now carried by the kits and applied by
   receivers that know no name.
 
+- **A `receive` with an argument has no inlet** (2026-09-10, read in Live's log after the
+  reopen at 14:37): Max reported "patchcord inlet out of range: deleting patchcord" 24 times,
+  one per Kit Receiver (14), Kit FX Receiver (9) and the panel. The cord it deleted was the
+  script's `set ks<bus>` into `r ks1`, so every receiver listened on bus 1 whatever its Bus
+  dial said; bus 1 is the set's, which is why nothing ever showed. Max's own reference says it:
+  "If there is no argument, receive has one inlet, and a name must be provided by a set
+  message before anything can be received." The three builders now make the receive
+  argument-less; the scripts already name it at compile time and on every bus change.
+- **A renamed script leaves its old name in the `js` box's saved attributes.** The Transpose
+  Q's box text said `js alberton-transpose-q.js` while its `saved_object_attributes` still
+  said `filename: alberton-transpose-v2.js`; at every load Max looked for the old file first
+  ("can't find file alberton-transpose-v2.js"), then compiled the new one from the text.
+  Fixed in the device. Its embedded copy (release form) still carries the old file until
+  `embed.py --write`, as `check_embedded.py` reports.
+
 ## Not yet verified
 
 - The full test with audio (`docs/PLAN.md` §5) on the set after the switch, the owner playing.

@@ -20,7 +20,7 @@ HANDOFF, the design in PLAN.
 |---|---|
 | Phase | 2, generalisation (`docs/PLAN.md` §2). Bass Mapper, Drum Mapper, Transpose Q, Kit Receiver, Kit FX Receiver and the V5 panel are built, tested and installed. Phase 1 complete. |
 | What the set holds now | **The switch is done (2026-09-10).** The V5 panel sits on MIDI REC (monitor In) with the twelve migrated kits; V4.3, the seven old PC Receivers and the test track are gone from the set (files in `_archive/` and in git). A Kit Receiver on fourteen tracks (strips 1–14), a Kit FX Receiver on nine (banks 1–9), Apply Volume on everywhere except the Vocoder fx receiver (its volume is strip 13's). |
-| Open right now | the full test with audio (`docs/PLAN.md` §5), the owner playing; then `install.py --release` and a save. Devices that vanished three times, unexplained (HANDOFF). |
+| Open right now | a set reload (the receivers rebuilt with an argument-less `receive`, the Transpose Q's stale js filename), then the full test with audio (`docs/PLAN.md` §5), the owner playing; then `install.py --release` and a save. Devices that vanished three times, unexplained (HANDOFF). |
 | Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad`, Kit Receiver and Kit FX Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form. **Before any show: `python3 tools/install.py --release`.** |
 | Tests | 77 (`npm test`), `tools/check_embedded.py` fails on purpose mid-development |
 | Published | **No.** Publication is the last phase. No remote is configured. |
@@ -39,6 +39,11 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — Two defects read in Live's log after the reopen: a `receive` with an argument
+  has no inlet, so Max had deleted the `set` cord in all 24 V5 devices and Bus was fixed at 1
+  (builders rebuilt with an argument-less receive); the Transpose Q's `js` box still carried
+  `alberton-transpose-v2.js` as its saved filename (fixed). Installed in development form;
+  effective at the next set reload.
 - **2026-09-10** — The switch: V5 panel on MIDI REC, V4.3 and the seven PC Receivers deleted
   over the LOM (indices verified by name first), the test track deleted, Apply Volume on for
   22 receivers. The set is V5 only.
