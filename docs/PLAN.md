@@ -117,15 +117,15 @@ after a save. Development form only during a work session; release form before a
   played a show.
 - **Dummy Tempo Automator** and **Gamepad**: already general; documentation only.
 
-### Phase 3 — Beat Window (the VisualBeat rewrite) — built 2026-09-10, last checks with the owner
+### Phase 3 — Beat Window (the VisualBeat rewrite) — done 2026-09-10
 
 An audio effect that passes audio through (`plugin~`/`plugout~`), counts bars and beats from
 `transport`, blinks on the beat, and opens a floating window whose content is a `jsui` drawing
 the beat number large, the bar.beat position beneath it, and a flash on every beat. The window
 size is polled with `thispatcher` (`window getsize`) and the `jsui` box follows it, so the content
 rescales with the window instead of sitting at a fixed size. Parameters: `Blink` (a share of the
-beat, in %), `Flash` (on/off), `Float` (open/close); a small copy of the drawing on the device face. Nothing from the downloaded `VisualBeat.amxd` is reused; both old
-files go to `_archive/` when this is done.
+beat, in %), `Flash` Nothing from the downloaded `VisualBeat.amxd` is reused; it went to `_archive/` when this was
+done, and `Alberton VisualBeat.amxd` stays in place while *TGHC Song.als* references it.
 
 ### Phase 4 — the full test, audio on — done 2026-09-10 (the switch, then the test with the owner playing)
 

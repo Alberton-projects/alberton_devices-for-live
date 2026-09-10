@@ -321,10 +321,14 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   is its `filename` attribute, not a `js` argument; `scripts_used` reads both. Under Node the
   stub gives a jsui `mgraphics`, a box and a `Date`, and `paint()` is exercised.
 
+- **Beat Window, last round, passed** (2026-09-10, 22:00): the device-face display runs with
+  the window closed; at 12/8 and 110 bpm the pulse lights and goes out on every beat at 25 %
+  and at 90 % (the owner left it at 33 %); Blink shows as a percentage. The owner took the old
+  VisualBeat off Main and put the Beat Window there; the set is saved with it and the release
+  form is installed. The downloaded `VisualBeat.amxd` went to `Max for Live/_archive/`;
+  `Alberton VisualBeat.amxd` stays where it is because *TGHC Song.als* still references it.
+
 ## Not yet verified
 
 - The vanishings' mechanism (above): only the correlation with installs remains. Watch for
   it, and never install with unsaved devices in the set.
-- The Beat Window's last round (the pulse as a share of the beat, the device-face display with
-  the window closed) and its place on the Main track in the owner's set, then the old
-  VisualBeat files to `_archive/`.
