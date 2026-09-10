@@ -238,10 +238,13 @@ def beat_window():
     p.comment("obj-title", "Beat Window", [8, 4, 140, 16])
     p.toggle("obj-flash", "Flash", [8, 30, 18, 18], initial=1, varname="flash")
     p.comment("obj-l-flash", "Flash", [30, 32, 60, 14], 9.0)
-    p.numbox("obj-blink", "Blink", [8, 58, 52, 16], initial=120, lo=10, hi=1000, shortname="Blink", varname="blink")
+    # a float parameter: an int parameter in Live has 256 steps at most (10..265 here); unit 2 shows time
+    p.numbox("obj-blink", "Blink", [8, 58, 56, 16], initial=120, lo=10, hi=1000, unit=2, shortname="Blink", varname="blink", is_float=True)
     p.comment("obj-l-blink", "Blink (ms)", [64, 60, 80, 14], 9.0)
     p.toggle("obj-float", "Float Window", [8, 86, 18, 18], initial=1, shortname="Float", varname="float")
     p.comment("obj-l-float", "Window", [30, 88, 80, 14], 9.0)
+    # the same drawing, small, on the device face: the beat is visible with the window closed
+    p.jsui("obj-mini", "beat-window.js", [132, 6, 106, 106], varname="minibeat", presentation=True)
 
     # audio straight through, so the device is silent to the signal but does not break the chain
     p.newobj("obj-pin", "plugin~", [520, 200], n_in=0, n_out=2, outlettype=["signal", "signal"])
@@ -299,7 +302,7 @@ def beat_window():
         {"id": "s-setup", "maxclass": "message",
          "text": "title Beat, window flags float, window exec, window grow",
          "numinlets": 2, "numoutlets": 1, "outlettype": [""], "patching_rect": [120, 392, 320, 20]},
-        {"id": "s-metro", "maxclass": "newobj", "text": "metro 250 @active 1", "numinlets": 2, "numoutlets": 1,
+        {"id": "s-metro", "maxclass": "newobj", "text": "metro 100 @active 1", "numinlets": 2, "numoutlets": 1,
          "outlettype": [""], "patching_rect": [120, 424, 120, 20]},
         {"id": "s-getsize", "maxclass": "message", "text": "window getsize", "numinlets": 2, "numoutlets": 1,
          "outlettype": [""], "patching_rect": [120, 456, 100, 20]},
@@ -315,11 +318,16 @@ def beat_window():
          "outlettype": [""], "patching_rect": [300, 540, 100, 20]},
         {"id": "s-eh", "maxclass": "newobj", "text": "expr $i3 - $i1", "numinlets": 3, "numoutlets": 1,
          "outlettype": [""], "patching_rect": [410, 540, 100, 20]},
-        {"id": "s-sp", "maxclass": "newobj", "text": "sprintf script size beatui %ld %ld", "numinlets": 2,
-         "numoutlets": 1, "outlettype": [""], "patching_rect": [300, 568, 220, 20]},
+        # the window shows the presentation, so the presentation rect is what must follow it;
+        # the patching rect is sized too (one sprintf each: a comma cannot live in an object box)
+        {"id": "s-sp", "maxclass": "newobj", "text": "sprintf script sendbox beatui presentation_rect 0 0 %ld %ld",
+         "numinlets": 2, "numoutlets": 1, "outlettype": [""], "patching_rect": [300, 568, 360, 20]},
+        {"id": "s-sp2", "maxclass": "newobj", "text": "sprintf script size beatui %ld %ld",
+         "numinlets": 2, "numoutlets": 1, "outlettype": [""], "patching_rect": [300, 596, 220, 20]},
         # the drawing surface, last so it paints on top of the plumbing; sized to the window
         {"id": "s-ui", "maxclass": "jsui", "filename": JS, "varname": "beatui", "parameter_enable": 0,
-         "numinlets": 1, "numoutlets": 1, "outlettype": [""], "patching_rect": [0, 0, 244, 220]},
+         "numinlets": 1, "numoutlets": 1, "outlettype": [""], "patching_rect": [0, 0, 244, 220],
+         "presentation": 1, "presentation_rect": [0, 0, 244, 220]},
     ]
     sub_lines = [
         ("s-indata", 0, "s-ui", 0),
@@ -329,13 +337,18 @@ def beat_window():
         ("s-un", 0, "s-ew", 0), ("s-un", 2, "s-ew", 2),      # width  = right - left
         ("s-un", 1, "s-eh", 0), ("s-un", 3, "s-eh", 2),      # height = bottom - top
         ("s-ew", 0, "s-sp", 0), ("s-eh", 0, "s-sp", 1),      # width triggers (fires last), height is cold
-        ("s-sp", 0, "s-tp", 0),
+        ("s-ew", 0, "s-sp2", 0), ("s-eh", 0, "s-sp2", 1),
+        ("s-sp", 0, "s-tp", 0), ("s-sp2", 0, "s-tp", 0),
     ]
-    p.subpatcher("obj-disp", "display", [240, 296], sub, sub_lines, openrect=[80, 80, 244, 220], n_in=2)
+    p.subpatcher("obj-disp", "display", [240, 296], sub, sub_lines, openrect=[80, 80, 244, 220], n_in=2,
+                 openinpresentation=1)
+    # the patcher behind the drawing in the same dark, so a size mismatch never shows
+    p.boxes[-1]["patcher"]["bgcolor"] = [0.105, 0.117, 0.149, 1.0]
+    p.boxes[-1]["patcher"]["editing_bgcolor"] = [0.105, 0.117, 0.149, 1.0]
     p.line("obj-pctl", 0, "obj-disp", 0)          # pcontrol identifies the window
-    p.line("obj-prep-beat", 0, "obj-disp", 1)
-    p.line("obj-prep-flash", 0, "obj-disp", 1)
-    p.line("obj-prep-blink", 0, "obj-disp", 1)
+    for src in ("obj-prep-beat", "obj-prep-flash", "obj-prep-blink"):
+        p.line(src, 0, "obj-disp", 1)
+        p.line(src, 0, "obj-mini", 0)
 
     with open(os.path.join(folder, JS), "rb") as f:
         script = f.read()

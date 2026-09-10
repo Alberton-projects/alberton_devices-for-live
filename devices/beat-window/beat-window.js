@@ -1,14 +1,18 @@
 // Beat Window — the floating display, drawn with mgraphics in a jsui.
 //
-// It receives three messages from the device patcher and draws them; it owns no timing.
+// It receives three messages from the device patcher and draws them; it owns no timing but
+// the length of its own pulse.
 //   beat <bar> <beat>   the transport position, both 1-based; a new beat pulses the ring
 //   flash <0|1>         whether a new beat should pulse
-//   blink <ms>          how long a pulse takes to fade
+//   blink <ms>          how long the pulse stays on
 //
 // The look is the original's: a warm digit, large and centred, on a dark disc, with the
-// bar.beat position beneath it. A ring around the disc flashes on the beat and fades over
-// `blink` ms. The drawing reads its size from the box every paint, so it rescales with the
-// window (the patcher resizes the box to the window through thispatcher).
+// bar.beat position beneath it. A ring around the disc lights on the beat for `blink` ms.
+// The pulse is square, not a fade, and it does not go out until paint() has drawn it once:
+// Live repaints a floating window only some ten to fifteen times a second, so a short fade
+// was usually first painted when already dim, and a beat could pass unseen. The drawing
+// reads its size from the box every paint, so it rescales with the window (the patcher
+// resizes the box to the window through thispatcher).
 
 autowatch = 1;
 mgraphics.init();
@@ -19,16 +23,17 @@ var curBar = 0, curBeat = 0;     // current position, 1-based; 0 before the firs
 var lastBeat = -1;               // to notice a new beat
 var flashEnabled = 1;
 var blinkMs = 120;
-var flashLevel = 0;              // 1 at the beat, fades to 0
-var FADE_MS = 33;                // the fade redraws at ~30 fps
-var fade = new Task(fadeStep, this);
+var pulseOn = 0;                 // 1 while the ring shows
+var pulseSeen = 0;               // paint() sets it once it has drawn the ring
+var HOLD_MS = 33;                // how much longer to keep a ring that has not been painted yet
+var off = new Task(pulseOff, this);
 
 // Colours, matched to the original: near-black ground, a darker disc, a warm digit.
 var COL_BG   = [0.105, 0.117, 0.149, 1.0];
 var COL_DISC = [0.071, 0.078, 0.098, 1.0];
 var COL_NUM  = [0.878, 0.478, 0.298, 1.0];
 var COL_SUB  = [0.50,  0.53,  0.58,  1.0];
-var COL_RING = [0.878, 0.478, 0.298, 1.0];
+var COL_RING = [0.878, 0.478, 0.298, 0.9];
 
 // ---- messages from the patcher --------------------------------------------
 
@@ -37,30 +42,30 @@ function beat(b, t) {
     curBar = b; curBeat = t;
     if (t !== lastBeat) {                // a new beat
         lastBeat = t;
-        if (flashEnabled) startFlash();
+        if (flashEnabled) startPulse();
     }
     if (changed) mgraphics.redraw();
 }
 
 function flash(on) {
     flashEnabled = on ? 1 : 0;
-    if (!flashEnabled) { flashLevel = 0; fade.cancel(); mgraphics.redraw(); }
+    if (!flashEnabled) { pulseOn = 0; off.cancel(); mgraphics.redraw(); }
 }
 
 function blink(ms) { blinkMs = Math.max(1, ms); }
 
-// ---- the pulse, faded on a wall clock (visual only, not musical timing) ----
+// ---- the pulse: on at the beat, off after blink ms, never before it was painted ----
 
-function startFlash() {
-    flashLevel = 1;
-    fade.cancel();
-    fade.interval = FADE_MS;
-    fade.repeat();
+function startPulse() {
+    pulseOn = 1;
+    pulseSeen = 0;
+    off.cancel();
+    off.schedule(blinkMs);
 }
 
-function fadeStep() {
-    flashLevel -= FADE_MS / blinkMs;      // a full fade takes blink ms
-    if (flashLevel <= 0) { flashLevel = 0; fade.cancel(); }
+function pulseOff() {
+    if (!pulseSeen) { off.schedule(HOLD_MS); return; }   // not on screen yet: keep it a little longer
+    pulseOn = 0;
     mgraphics.redraw();
 }
 
@@ -80,10 +85,11 @@ function paint() {
         set_source_rgba(COL_BG);   rectangle(0, 0, w, h); fill();
         set_source_rgba(COL_DISC); ellipse(cx - rx, cy - ry, rx * 2, ry * 2); fill();
 
-        if (flashLevel > 0) {
-            set_source_rgba(COL_RING[0], COL_RING[1], COL_RING[2], flashLevel * 0.9);
-            set_line_width(Math.max(2, h * 0.02));
+        if (pulseOn) {
+            set_source_rgba(COL_RING);
+            set_line_width(Math.max(3, h * 0.03));
             ellipse(cx - rx, cy - ry, rx * 2, ry * 2); stroke();
+            pulseSeen = 1;
         }
 
         select_font_face("Arial Bold");
