@@ -244,6 +244,12 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   kit's banks, through `fx` on the bus — while the drum chain selectors read 9. Kits, programs,
   fx banks and the receivers hold together; only volumes stay switched off until the switch.
 
+- **After the switch** (2026-09-10): with V4.3 and the PC Receivers gone and Apply Volume on,
+  one Send settled every volume to the migrated kit's values — Kick 0.70, Bass Electric 0.85,
+  Live Scratcher 0.36, Vocals 0.625, the DRUMS group 0.70, Resample 0.85, Main 0.85 — the same
+  numbers V4.3's `resetVolumes` used to force by name, now carried by the kits and applied by
+  receivers that know no name.
+
 ## Not yet verified
 
 
