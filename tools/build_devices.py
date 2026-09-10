@@ -122,7 +122,7 @@ def kit_selector_v5():
         p.line("obj-pattr-" + key, 0, "obj-pfx-" + key, 0)      # a slider recalled with a kit
         p.line("obj-pfx-" + key, 0, "obj-js", 0)
         p.line("obj-fxroute", i, "obj-" + key, 0)               # a slider captured from Live
-        subscribe.append("subscribe %s_fx" % key)
+        subscribe.append("subscribe pattr_" + key)   # the pattr is the kit member; a parameter-enabled multislider is not a pattrstorage client
     p.newobj("obj-fxroute", "route " + " ".join(k + "_fx" for k in FX_KEYS), [900, 660], n_out=10, outlettype=[""] * 10)
     p.message("obj-capmsg", "capture_fx", [652, 660])
     p.line("obj-capture", 0, "obj-capmsg", 0); p.line("obj-capmsg", 0, "obj-js", 0)
