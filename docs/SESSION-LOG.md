@@ -14,16 +14,27 @@ HANDOFF, the design in PLAN.
 
 ---
 
-## Current state — 2026-09-09
+## Current state — 2026-09-10, afternoon
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built and verified, receivers on fourteen real tracks, the twelve kits migrated; V5.1 (fx banks through the Kit FX Receiver, fx volumes per kit) built, to be placed and verified; then the switch. Phase 1 complete |
-| Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
-| Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
-| Open | the three Live checks of PLAN §3, before V5 is built |
-| Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad` and the new Kit Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form |
+| Phase | 2, generalisation (`docs/PLAN.md` §2). Bass Mapper, Drum Mapper, Transpose Q, Kit Receiver, Kit FX Receiver and the V5 panel are built, tested and installed. Phase 1 complete. |
+| What the set holds now | V4.3 still on MIDI REC with the seven old PC Receivers (active). The V5 panel on a test track "V5 panel" (monitor In) with the twelve migrated kits; a Kit Receiver on fourteen tracks (strips 1–14, Apply Volume off); a Kit FX Receiver on nine tracks (banks 1–9, Apply Volume off). Saved and reopened 2026-09-10 ~15:00 with the latest patchers. |
+| Open right now | verify the fx path after the reopen: FX Capture fills the sliders; recalling "Tabú" writes DRUMS `[FX]` Macro 1 = 114, Macro 8 = 11, Resample Macro 1 = 64. Then the switch (§ below). Devices that vanished three times, unexplained (HANDOFF). |
+| Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad`, Kit Receiver and Kit FX Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form. **Before any show: `python3 tools/install.py --release`.** |
+| Tests | 77 (`npm test`), `tools/check_embedded.py` fails on purpose mid-development |
 | Published | **No.** Publication is the last phase. No remote is configured. |
+
+### The switch, when the fx path is verified
+
+1. Move the V5 panel to MIDI REC (or keep its own track, armed / monitor In) and switch V4.3 off, then delete V4.3 and the seven PC Receivers from the set (the files stay in `_archive/`).
+2. Apply Volume on: every Kit Receiver (strips 1–14) and every Kit FX Receiver (banks 1–9 except Vocoder's, whose volume is strip 13's). The migrated kits carry V4.3's volume policy.
+3. Full test with audio (`docs/PLAN.md` §5), the owner playing; then `install.py --release` for everything.
+4. Phase 3 Beat Window; Phase 5 publication (README, INSTALL, the GitHub repository from this folder).
+
+### Facts a new session needs (all in HANDOFF, in short)
+
+`LiveAPI.id` of a dead path is the string "0" (`exists()`); a recompile resets script state (every script reads its controls back at compile time); a `send` forwards "set" (channels are `forward` objects); a parameter-enabled multislider is not a pattrstorage client (its `pattr @bindto`, named by argument, is); a device's blob parameters are one hex JSON in the `.als` (`tools/migrate_kits.py`); a device in a folded group cannot be loaded onto from the browser; Live's `Log.txt` carries the Max window.
 
 ## Log
 
