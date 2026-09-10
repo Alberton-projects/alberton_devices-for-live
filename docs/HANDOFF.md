@@ -221,10 +221,12 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
 - **A parameter-enabled multislider is not a pattrstorage client**: its `pattr @bindto` is.
   The V5 panel subscribes `pattr_<bank>`; subscribing the multislider stored nothing.
 
-## Not yet verified
+- **The migrated kits work on the set** (2026-09-10): after reopening, the owner recalled
+  "Tabú" on the V5 panel and the four drum chain selectors read 9, and the receivers on
+  Bass Synth, Pad 2, Lead 1 and Lead 2 read 24, 16, 74 and 1, exactly V4.3's kit 3. Twelve kits,
+  names included, through the set file and one reopen; no export button was ever needed.
 
-- The migrated kits on the set: recall "Tabú" and read the four drum chain selectors at 9,
-  Bass Synth 24, Pad 2 16, Lead 1 74, Lead 2 1 on the receivers.
+## Not yet verified
 
 
 - The three Live checks the V5 design rests on (`docs/PLAN.md` §3).

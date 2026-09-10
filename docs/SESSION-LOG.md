@@ -18,7 +18,7 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built and verified end to end on test tracks, kits and MIDI recall included; next the kit migration, the audio receiver (V5.1) and the switch. Phase 1 complete |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built, verified, receivers on fourteen real tracks, the twelve kits migrated and verified; next the audio receiver (V5.1) and the switch. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
@@ -29,7 +29,7 @@ HANDOFF, the design in PLAN.
 
 - **2026-09-10** — The twelve V4.3 kits migrated into the V5 panel through the set file
   (`bb18efd`, `tools/migrate_kits.py`), original kept as `.pre-migrate-20260910-134708`.
-  Verification on reopening pending.
+  Verified on reopening: "Tabú" recalled on V5 drives the real tracks as V4.3's kit 3 did.
 - **2026-09-10** — Kit Receivers on fourteen tracks of the real set, beside the old PC Receivers:
   strips 1–4 Kick, Snare, HiHat, Cymbals (Macro 1), 5–12 Bass Electric, Bass Synth, Pad 1, Pad 2,
   Piano 1, Piano 2, Lead 1, Lead 2 (Program Change), 13–14 Vocoder and Live Scratcher (None).

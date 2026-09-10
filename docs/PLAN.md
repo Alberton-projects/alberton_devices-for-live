@@ -161,9 +161,9 @@ repository created from the working folder with its history, first push.
   so placement is the binding and no rack name is needed. `Bus`, `FX strip`; applies macros 1–8 of
   its parent rack; answers `capture` with the current values; optional `Apply volume` for the
   track. Group tracks cannot host MIDI effects, which is why this is a separate audio device.
-- **Storage.** Kits stay in the panel's `pattrstorage`, switched to `subscribemode 1` with explicit
-  membership, so global settings (`Bus`, `MIDI Ch`) are never stored in a kit. Migration of the
-  owner's 32 kits: export from V4.3 with `pattrstorage write`, rename the keys, read into V5.
+- **Storage** — **done and verified 2026-09-10.** Kits stay in the panel's `pattrstorage`, switched to `subscribemode 1` with explicit
+  membership, so global settings (`Bus`, `MIDI Ch`) are never stored in a kit. The owner's kits (twelve,
+  not thirty-two) were migrated through the set file with `tools/migrate_kits.py`, no export needed.
 - **Names.** `Alberton Kit Selector` (V5), `Alberton Kit Receiver`, `Alberton Kit FX Receiver`.
 
 **Checked in Live on 2026-09-09, all three passed** (`docs/HANDOFF.md`): one `send` per bus with the
