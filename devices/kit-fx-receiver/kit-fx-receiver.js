@@ -147,9 +147,10 @@ function who() {
     announce();
 }
 
-function prog() {}   // the MIDI receivers' business
+function prog() {}   // the MIDI receivers' business, on the same bus
 function vol() {}
 function kit() {}
+function bound() {}
 
 function fx() {
     var a = arrayfromargs(arguments);

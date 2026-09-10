@@ -158,6 +158,12 @@ function kit() {
     // informational: the panel says which kit it recalled; nothing to do here
 }
 
+// the fx receivers' business, on the same bus
+function fx() {}
+function fxvol() {}
+function capture() {}
+function boundfx() {}
+
 function fx() {
     // the FX receivers' business (V5.1); nothing to do here
 }
