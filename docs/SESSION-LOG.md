@@ -27,6 +27,9 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — Migration rerun with Live closed (idempotent: it rewrites the V5 blob from
+  V4.3's): the resample bank at [64, 0…] and an fx volume per bank in every kit. Original kept as
+  `.pre-migrate-20260910-140455`. Next: nine Kit FX Receivers on the set, then "Tabú" again.
 - **2026-09-10** — V5.1: Alberton Kit FX Receiver built (audio effect, governs the nearest
   rack, seven tests); the panel broadcasts fx banks and fx volumes instead of finding racks by
   name, and gains a volume dial per bank; PROTOCOL.md part A describes V5. The migration adds
