@@ -265,9 +265,49 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   Fixed in the device. Its embedded copy (release form) still carries the old file until
   `embed.py --write`, as `check_embedded.py` reports.
 
+- **The full test with audio (`docs/PLAN.md` §5) passed on 2026-09-10 in the evening**, the
+  owner playing, the set read over the bridge after every step with a kit checker that
+  compares the panel dials, the four drum chain selectors, every receiver's Last, the track
+  and Main volumes and the nine [FX] racks' macros 1–9 against the kit stored in the set file
+  (the tools sit in the MCP working directory, `_handoff-devices/tools-2026-09-10/`, since
+  they carry the set's names). "Pelotita" and "Tabú" from the grid, then the same two by
+  program change 7 and 2 from the controller: zero differences each time. The strip labels
+  show the fourteen track names. Transpose Q: Pending 2 put every one of the nine `[PITCH]`
+  devices at 2 on the bar and Pending 0 brought them back. Gamepad: a clip on Vocals and a
+  scene from the pad, seen in `playing_slot_index`. Mappers by ear: held notes, retrigger,
+  pedal, all fine. Tempo Automator over the LOM: dial 104 gave tempo 104, with Active off the
+  dial did not apply, Active on re-sent it, dial 120 gave 120. Bus 2, reversible: with the
+  panel and the Pad 1 receiver on bus 2, P7 reached Pad 1 and the bus-1 receiver on Pad 2 did
+  not move.
+- **The Vocoder fx receiver sat on bank 1.** Found by the kit checker: the Vocoder's [FX] rack
+  carried the drums bank's values (114, 11). It was one of the receivers reloaded from the
+  browser after a vanishing, and its Bank had stayed at the default. Set to 7 over the LOM and
+  saved; the next recall wrote the vocoder bank.
+- **The release form loads clean.** After `embed.py --write`, `check_embedded.py` (all ten ok)
+  and `install.py --release`, the set reopened on the embedded devices with nothing in the
+  Max window but the Live Scratcher's `buffer~` and the Gamepad's `dict` lines, and "Tabú"
+  matched with zero differences after a Send.
+- **Live re-instantiates every instance of a Max for Live device when its `.amxd` changes on
+  disk**, seconds to minutes later, with the set open: at 14:26:30 three files were replaced
+  by `install.py --dev`, and at 14:26:44 the log shows six MxDCore "SendMessage returned with
+  error 2" lines and eighteen "patchcord inlet out of range" lines, one per V5 device then in
+  the set; the install of 14:18:53 was followed at 14:21:47 by fifteen (the fourteen Kit
+  Receivers and the panel); and the release install of 20:09:13 by two SendMessage errors at
+  20:09:41, the Gamepad's menu restored ("Value 27 out of range for 'live.menu'", which
+  otherwise appears only at a set load), the Live Scratcher chain re-applied and three Analog
+  Lab V program lists re-scanned. The August note that Live only picks a change up at the
+  next instantiation was wrong. This is also the probable cause of the vanishings: every
+  episode sat in a window with installs of the very device that vanished, loaded from the
+  browser and not yet saved, while every saved instance survived. Rule: save the set before
+  any `install.py`, and expect the instances to reload by themselves.
+- **Parameter values move while the owner plays.** After the tests the Live Scratcher's fader
+  read 0.70 and the DRUMS rack's macro 1 read 66 where the kit says 0.36 and 114; the saved set
+  already had the fader at −6 dB. Neither came from the devices; a recall or a Send puts them
+  back, which is what a kit is for.
+
 ## Not yet verified
 
-- The full test with audio (`docs/PLAN.md` §5) on the set after the switch, the owner playing.
-- The release form on the set: every device embedded (`tools/embed.py --write`,
-  `tools/check_embedded.py`, `tools/install.py --release`) and the set reopened on it.
-- The cause of the vanished receivers (above): open until it happens under observation.
+- The vanishings' mechanism (above): the correlation with installs is strong, the reason a
+  browser-loaded instance is dropped by the reload is not known. Watch for it, and never
+  install with unsaved devices in the set.
+- The Beat Window (Phase 3), not built yet.

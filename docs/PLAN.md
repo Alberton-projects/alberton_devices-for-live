@@ -102,7 +102,7 @@ after a save. Development form only during a work session; release form before a
 | Mappers — **done 2026-09-09, verified with sound** | pass every non-note MIDI message through (today only notes survive the mapper, so no sustain or pitch bend reaches the Fretless Bass); `note-queue.js` shared by text with `reset` and CC 123 all-notes-off; pool built once; `isInRange` by lookup; cymbals deterministic, hi-hat random with the reason in a comment; the Transpose Q display dial gets the range −12..12 | Node tests on every mapping function (characterisation tests written first, `npm test`); a held-note and a pedal test in Live |
 | All | comments in English | — |
 
-### Phase 2 — generalisation
+### Phase 2 — generalisation — done 2026-09-10
 
 - **Bass Mapper** — **done 2026-09-09**: `Low` and `High` as `live.numbox` parameters (defaults C1 36 and C3 60), shown as note names.
 - **Drum Mapper** — **done and verified 2026-09-09**: the target notes as parameters with their GM defaults (kick, side stick,
@@ -127,7 +127,7 @@ rescales with the window instead of sitting at a fixed size. Parameters: `Blink`
 (on/off), `Float` (open/close). Nothing from the downloaded `VisualBeat.amxd` is reused; both old
 files go to `_archive/` when this is done.
 
-### Phase 4 — the full test, audio on — the switch to V5 was made 2026-09-10; the test is next
+### Phase 4 — the full test, audio on — done 2026-09-10 (the switch, then the test with the owner playing)
 
 The verification protocol in §5 runs in full on the set, with the owner playing. V4.3 and the old
 Receiver are only removed from the set after V5.0 has passed it. Anything that fails goes back to

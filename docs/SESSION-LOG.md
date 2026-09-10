@@ -18,20 +18,21 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2). Bass Mapper, Drum Mapper, Transpose Q, Kit Receiver, Kit FX Receiver and the V5 panel are built, tested and installed. Phase 1 complete. |
+| Phase | 4 done: the full test with audio passed on 2026-09-10 (HANDOFF). Phases 0, 1, 2 and 4 complete; Phase 3 (Beat Window) and Phase 5 (publication) remain. |
 | What the set holds now | **The switch is done (2026-09-10).** The V5 panel sits on MIDI REC (monitor In) with the twelve migrated kits; V4.3, the seven old PC Receivers and the test track are gone from the set (files in `_archive/` and in git). A Kit Receiver on fourteen tracks (strips 1–14), a Kit FX Receiver on nine (banks 1–9), Apply Volume on everywhere except the Vocoder fx receiver (its volume is strip 13's). |
-| Open right now | a set reload (the receivers rebuilt with an argument-less `receive`, the Transpose Q's stale js filename), then the full test with audio (`docs/PLAN.md` §5), the owner playing; then `install.py --release` and a save. Devices that vanished three times, unexplained (HANDOFF). |
-| Installed form | `transpose-q`, V4.3, V5 panel, `bass-mapper`, `drum-mapper`, `gamepad`, Kit Receiver and Kit FX Receiver in development form (plain device, script symlinked from here); the old PC Receiver and the Tempo Automator in release form. **Before any show: `python3 tools/install.py --release`.** |
-| Tests | 77 (`npm test`), `tools/check_embedded.py` fails on purpose mid-development |
+| Open right now | Phase 3, the Beat Window; then Phase 5, publication. The vanishings have a probable cause (installs with the set open; HANDOFF): save before any install. |
+| Installed form | **Release form, all ten devices** (scripts embedded, no symlinks), installed 2026-09-10 20:09 and loaded by the set. Development form only during a work session, and back to release before a show. |
+| Tests | 77 (`npm test`); `tools/check_embedded.py` passes for all ten devices |
 | Published | **No.** Publication is the last phase. No remote is configured. |
 
-### After the switch
+### What is left
 
-1. Full test with audio (`docs/PLAN.md` §5): every kit, the drums, the programs, the fx banks, the
-   volumes, Main, the MIDI recall, the Transpose Q, the mappers, the Gamepad.
-2. `python3 tools/embed.py --write`, `check_embedded.py`, `install.py --release` for every device,
-   then save the set. From then on the set loads self-contained devices.
-3. Phase 3 Beat Window; Phase 5 publication (READMEs, INSTALL, the GitHub repository).
+1. Phase 3 Beat Window (`docs/PLAN.md` §2).
+2. Phase 5 publication: per-device READMEs, INSTALL, README.md and README.ca.md, the manifest
+   without V4.3 and the old PC Receiver, the GitHub repository from this folder.
+
+The set-reading tools of the test (kit checker, state reader, bus test) are in the MCP working
+directory, `_handoff-devices/tools-2026-09-10/`, because they carry the set's names.
 
 ### Facts a new session needs (all in HANDOFF, in short)
 
@@ -39,6 +40,12 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — Full test with audio passed (HANDOFF): kits by grid and by program change,
+  labels, Transpose Q, Gamepad, mappers, Tempo Automator, bus 2. Vocoder fx receiver found on
+  bank 1, set to 7. Release form: `embed.py --write`, `check_embedded.py` ok for all ten,
+  `install.py --release` (`134fe64`); the set reopened on it, clean, and was saved. From the
+  log: Live re-instantiates a device's instances when its file changes on disk, the probable
+  cause of the vanishings; save before any install.
 - **2026-09-10** — Two defects read in Live's log after the reopen: a `receive` with an argument
   has no inlet, so Max had deleted the `set` cord in all 24 V5 devices and Bus was fixed at 1
   (builders rebuilt with an argument-less receive); the Transpose Q's `js` box still carried
