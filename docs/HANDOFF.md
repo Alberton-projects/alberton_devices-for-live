@@ -226,6 +226,17 @@ box for box; the August repairs live in the `.amxd`. Kit Selector V3 embeds an o
   Bass Synth, Pad 2, Lead 1 and Lead 2 read 24, 16, 74 and 1, exactly V4.3's kit 3. Twelve kits,
   names included, through the set file and one reopen; no export button was ever needed.
 
+- **A `send` object forwards `set`; a `forward` object is what "send <name>" renames.** The
+  panel's channel naming at load ("set ks1" into `s ks1`) reached every receiver's script as a
+  "set" message. Bus and reply channels are `forward` objects now. `receive` does take `set`.
+- **Devices that vanished, unexplained.** Three times on 2026-09-10, Kit FX Receivers loaded
+  from the browser onto group tracks (and once Vocoder and Vocals) were gone minutes later
+  while the set stayed open; the ones in the saved set never were. Reproduction attempts
+  failed: idle time, single and parallel parameter writes, parallel loads and a full Send all
+  left nine receivers in place. Every episode had the owner at the controller; an undo (Cmd-Z
+  or a mapped button) would remove exactly the last loads and writes, in reverse order, which
+  matches what was seen. Open until it happens again under observation.
+
 ## Not yet verified
 
 
