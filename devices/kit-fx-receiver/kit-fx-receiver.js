@@ -20,7 +20,7 @@
 autowatch = 1;
 inlets = 1;
 outlets = 3;
-// 0: the reply send -- "set ks<bus>_ret", then fxret / boundfx
+// 0: the reply channel, a forward object -- "send ks<bus>_ret", then fxret / boundfx
 // 1: the receive object -- "set ks<bus>"
 // 2: Applied, how many macros the last fx message wrote, for the display
 
@@ -79,8 +79,8 @@ function applyvol(v) {
 }
 
 function setChannels() {
-    outlet(1, "set", "ks" + busNumber);
-    outlet(0, "set", "ks" + busNumber + "_ret");
+    outlet(1, "set", "ks" + busNumber);            // a receive: "set" renames it
+    outlet(0, "send", "ks" + busNumber + "_ret");  // a forward: "send" names its target
 }
 
 // ============ WHERE THIS DEVICE SITS ============

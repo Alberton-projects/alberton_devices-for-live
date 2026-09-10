@@ -39,8 +39,8 @@ def kit_receiver():
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 300", [40, 270])
     p.message("obj-init", "init", [140, 270])
-    p.newobj("obj-recv", "r ks1", [300, 240], n_in=0, n_out=1)
-    p.newobj("obj-ret", "s ks1_ret", [300, 400], n_out=0, outlettype=[])
+    p.newobj("obj-recv", "r ks1", [300, 240], n_in=1, n_out=1)
+    p.newobj("obj-ret", "forward", [300, 400], n_out=0, outlettype=[])
     for key in ("bus", "strip", "action", "applyvol"):
         p.newobj("obj-p-" + key, "prepend " + key, [500, 240 + 30 * ["bus", "strip", "action", "applyvol"].index(key)])
         p.line("obj-" + key, 0, "obj-p-" + key, 0)
@@ -160,8 +160,8 @@ def kit_selector_v5():
         p.line(a, o, b, i)
     # the script, the bus, the buttons
     p.js("obj-js", "kit-selector.js", [40, 800], n_out=3)
-    p.newobj("obj-send-obj", "s ks1", [40, 860], n_out=0, outlettype=[])
-    p.newobj("obj-ret", "r ks1_ret", [200, 760], n_in=0, n_out=1)
+    p.newobj("obj-send-obj", "forward", [40, 860], n_out=0, outlettype=[])
+    p.newobj("obj-ret", "r ks1_ret", [200, 760], n_in=1, n_out=1)
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 500", [40, 270])
     p.message("obj-init", "init", [140, 270])
@@ -200,8 +200,8 @@ def kit_fx_receiver():
     p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
     p.newobj("obj-delay", "delay 300", [40, 270])
     p.message("obj-init", "init", [140, 270])
-    p.newobj("obj-recv", "r ks1", [300, 240], n_in=0, n_out=1)
-    p.newobj("obj-ret", "s ks1_ret", [300, 400], n_out=0, outlettype=[])
+    p.newobj("obj-recv", "r ks1", [300, 240], n_in=1, n_out=1)
+    p.newobj("obj-ret", "forward", [300, 400], n_out=0, outlettype=[])
     for key in ("bus", "bank", "applyvol"):
         p.newobj("obj-p-" + key, "prepend " + key, [500, 240 + 30 * ["bus", "bank", "applyvol"].index(key)])
         p.line("obj-" + key, 0, "obj-p-" + key, 0)

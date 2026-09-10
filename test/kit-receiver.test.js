@@ -32,7 +32,7 @@ test('at init it learns its track from its own path and introduces itself on the
   const d = boot();
   d.Task.advance(0);
   assert.deepEqual(d.take(2), [['set', 'ks1']]);
-  assert.deepEqual(d.take(3), [['set', 'ks1_ret']]);
+  assert.deepEqual(d.take(3), [['send', 'ks1_ret']]);
   d.send('init');
   assert.equal(d.ctx.trackName, 'Kick');
   assert.equal(d.ctx.rackPath, 'live_set tracks 1 devices 1');
@@ -58,7 +58,7 @@ test('changing strip or bus re-announces and renames the channels', () => {
   assert.deepEqual(d.take(3), [['bound', 5, 'Kick']]);
   d.send('bus', 2);
   assert.deepEqual(d.take(2), [['set', 'ks2']]);
-  assert.deepEqual(d.take(3), [['set', 'ks2_ret'], ['bound', 5, 'Kick']]);
+  assert.deepEqual(d.take(3), [['send', 'ks2_ret'], ['bound', 5, 'Kick']]);
   d.send('prog', 1, 9);
   assert.deepEqual(d.take(0), [], 'strip 1 is no longer mine');
 });

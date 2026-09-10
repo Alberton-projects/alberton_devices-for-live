@@ -69,7 +69,7 @@ test('a track with no rack refuses with a warning; bank and bus changes re-annou
   assert.deepEqual(d.take(0), [['boundfx', 4, '1 DRUMS']]);
   d.send('bus', 2);
   assert.deepEqual(d.take(1), [['set', 'ks2']]);
-  assert.deepEqual(d.take(0), [['set', 'ks2_ret'], ['boundfx', 4, '1 DRUMS']]);
+  assert.deepEqual(d.take(0), [['send', 'ks2_ret'], ['boundfx', 4, '1 DRUMS']]);
 });
 
 test('at compile time bus, bank and apply volume are read from the patcher', () => {

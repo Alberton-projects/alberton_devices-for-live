@@ -25,7 +25,7 @@ outlets = 4;
 // 0: the program change, as an int for midiformat
 // 1: Last, the value last received, for the display
 // 2: the receive object -- "set ks<bus>"
-// 3: the reply send -- "set ks<bus>_ret", then the messages themselves
+// 3: the reply channel, a forward object -- "send ks<bus>_ret", then the messages themselves
 
 // ============ LOGGING ============
 
@@ -89,8 +89,8 @@ function applyvol(v) {
 }
 
 function setChannels() {
-    outlet(2, "set", "ks" + busNumber);
-    outlet(3, "set", "ks" + busNumber + "_ret");
+    outlet(2, "set", "ks" + busNumber);            // a receive: "set" renames it
+    outlet(3, "send", "ks" + busNumber + "_ret");  // a forward: "send" names its target
 }
 
 // ============ WHERE THIS DEVICE SITS ============

@@ -46,7 +46,7 @@ test('the main dial writes the master volume; bus renames both channels and asks
   d.send('vmain', 0.6);
   assert.equal(d.live.live_set.children.master_track.children.mixer_device.children.volume.value, 0.6);
   d.send('bus', 2);
-  assert.deepEqual(d.take(0), [['set', 'ks2'], ['who']]);
+  assert.deepEqual(d.take(0), [['send', 'ks2'], ['who']]);
   assert.deepEqual(d.take(1), [['set', 'ks2_ret']]);
 });
 
@@ -103,5 +103,5 @@ test('at compile time the dials, the main and the bus are read from the patcher'
   d.Task.advance(0);
   assert.equal(d.ctx.prog[1], 12); assert.equal(d.ctx.vol[1], 0.4); assert.equal(d.ctx.mainVol, 0.9); assert.equal(d.ctx.busNumber, 3);
   assert.deepEqual(d.ctx.fxValues[1], [9, 8, 7, 6, 5, 4, 3, 2, 1]); assert.equal(d.ctx.fxVol[1], 0.3);
-  assert.deepEqual(d.take(0), [['set', 'ks3']]);
+  assert.deepEqual(d.take(0), [['send', 'ks3']]);
 });

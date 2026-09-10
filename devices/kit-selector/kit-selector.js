@@ -24,7 +24,7 @@
 autowatch = 1;
 inlets = 1;
 outlets = 3;
-// 0: the bus send -- "set ks<bus>", then the messages
+// 0: the bus, a forward object -- "send ks<bus>", then the messages
 // 1: the reply receive -- "set ks<bus>_ret"
 // 2: the FX banks -- "<key>_fx v1..v9" for the multisliders, and "fx_captured"
 
@@ -179,8 +179,8 @@ function bus(v) {
 }
 
 function setChannels() {
-    outlet(0, "set", "ks" + busNumber);
-    outlet(1, "set", "ks" + busNumber + "_ret");
+    outlet(0, "send", "ks" + busNumber);          // the bus is a forward object: "send" names its target
+    outlet(1, "set", "ks" + busNumber + "_ret");   // the reply channel is a receive: "set" renames it
 }
 
 function init() {
