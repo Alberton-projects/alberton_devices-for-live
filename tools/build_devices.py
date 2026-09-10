@@ -104,11 +104,17 @@ def kit_selector_v5():
     p.dial("obj-vmain", "Main Volume", [640, 138, 60, 26], initial=0.85, lo=0, hi=1, unit=1, shortname="Main", varname="vmain", is_float=True, tiny=True)
     p.boxes[-1]["showname"] = 0
     subscribe.append("subscribe vmain")
-    # the fx banks (V5.0: by group name), 70x40 as in V4.3, in two rows
+    # the fx banks, 70x40 as in V4.3, in two rows, each with the volume of its track under it
     for i, key in enumerate(FX_KEYS):
         col, row = i % 5, i // 5
-        x, y = 796 + 74 * col, 4 + 68 * row
+        x, y = 796 + 74 * col, 4 + 80 * row
         p.comment("obj-lfx-" + key, key, [x, y, 70, 12], 8.0)
+        p.dial("obj-fxvol-" + key, "FX Volume " + key, [x, y + 56, 70, 20], initial=0.85, lo=0, hi=1, unit=1,
+               shortname="FxV" + key[:4], varname="fxvol_" + key, is_float=True, tiny=True)
+        p.boxes[-1]["showname"] = 0
+        p.newobj("obj-pfxv-" + key, "prepend fxvol_" + key, [900 + 60 * i, 780])
+        p.line("obj-fxvol-" + key, 0, "obj-pfxv-" + key, 0); p.line("obj-pfxv-" + key, 0, "obj-js", 0)
+        subscribe.append("subscribe fxvol_" + key)
         p.box("obj-" + key, "multislider", rect=[x, y + 14, 70, 40], parameter_enable=1, numinlets=1, numoutlets=2, outlettype=["", ""],
               saved_attribute_attributes={"valueof": {"parameter_invisible": 1, "parameter_longname": key + "_fx", "parameter_modmode": 0,
                                                       "parameter_shortname": key + "_fx", "parameter_type": 3}},
@@ -176,7 +182,44 @@ def kit_selector_v5():
     print("  %-32s %6d bytes" % (os.path.basename(path), len(data)))
 
 
-BUILDERS = {"kit-receiver": kit_receiver, "kit-selector-v5": kit_selector_v5}
+def kit_fx_receiver():
+    folder = os.path.join(ROOT, "devices", "kit-fx-receiver")
+    p = Patcher("audio", 270, 100)
+    p.comment("obj-title", "Kit FX Receiver", [8, 4, 120, 16])
+    p.comment("obj-l-bank", "Bank", [8, 24, 60, 14], 9.0)
+    p.numbox("obj-bank", "Bank", [8, 40, 64, 34], initial=1, lo=1, hi=9, varname="bank")
+    p.boxes[-1]["fontsize"] = 24.0
+    p.comment("obj-l-bus", "Bus", [84, 24, 36, 14], 9.0)
+    p.numbox("obj-bus", "Bus", [84, 40, 36, 15], initial=1, lo=1, hi=4, varname="bus")
+    p.comment("obj-l-applied", "Applied", [84, 60, 50, 14], 9.0)
+    p.numbox("obj-applied", "Applied", [84, 76, 36, 15], initial=0, lo=-1, hi=9, varname="applied")
+    p.toggle("obj-applyvol", "Apply Volume", [130, 40, 15, 15], initial=1, shortname="ApplyVol", varname="applyvol")
+    p.comment("obj-l-applyvol", "Apply volume", [150, 39, 110, 16], 9.0)
+    p.comment("obj-hint", "governs the nearest rack", [130, 60, 130, 14], 8.0)
+    p.js("obj-js", "kit-fx-receiver.js", [40, 300], n_out=3)
+    p.newobj("obj-this", "live.thisdevice", [40, 240], n_in=1, n_out=3, outlettype=["bang", "int", "int"])
+    p.newobj("obj-delay", "delay 300", [40, 270])
+    p.message("obj-init", "init", [140, 270])
+    p.newobj("obj-recv", "r ks1", [300, 240], n_in=0, n_out=1)
+    p.newobj("obj-ret", "s ks1_ret", [300, 400], n_out=0, outlettype=[])
+    for key in ("bus", "bank", "applyvol"):
+        p.newobj("obj-p-" + key, "prepend " + key, [500, 240 + 30 * ["bus", "bank", "applyvol"].index(key)])
+        p.line("obj-" + key, 0, "obj-p-" + key, 0)
+        p.line("obj-p-" + key, 0, "obj-js", 0)
+    p.newobj("obj-pin", "plugin~", [800, 240], n_in=0, n_out=2, outlettype=["signal", "signal"])
+    p.newobj("obj-pout", "plugout~", [800, 300], n_in=2, n_out=0, outlettype=[])
+    for a, o, b, i in [("obj-this", 0, "obj-delay", 0), ("obj-delay", 0, "obj-init", 0), ("obj-init", 0, "obj-js", 0),
+                       ("obj-recv", 0, "obj-js", 0), ("obj-js", 0, "obj-ret", 0), ("obj-js", 1, "obj-recv", 0),
+                       ("obj-js", 2, "obj-applied", 0), ("obj-pin", 0, "obj-pout", 0), ("obj-pin", 1, "obj-pout", 1)]:
+        p.line(a, o, b, i)
+    with open(os.path.join(folder, "kit-fx-receiver.js"), "rb") as f:
+        script = f.read()
+    path = os.path.join(folder, "Alberton Kit FX Receiver.amxd")
+    data = p.write(path, scripts={"kit-fx-receiver.js": script})
+    print("  %-32s %6d bytes" % (os.path.basename(path), len(data)))
+
+
+BUILDERS = {"kit-receiver": kit_receiver, "kit-selector-v5": kit_selector_v5, "kit-fx-receiver": kit_fx_receiver}
 
 if __name__ == "__main__":
     for name in (sys.argv[1:] or BUILDERS):

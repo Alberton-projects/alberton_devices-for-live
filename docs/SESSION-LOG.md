@@ -18,7 +18,7 @@ HANDOFF, the design in PLAN.
 
 | | |
 |---|---|
-| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built, verified, receivers on fourteen real tracks, the twelve kits migrated and verified; next the audio receiver (V5.1) and the switch. Phase 1 complete |
+| Phase | 2, generalisation (`docs/PLAN.md` §2): 2.1 Bass Mapper and 2.3 Transpose Q done and verified; 2.2 Drum Mapper parameters done and verified; 2.4 Kit Selector V5: receiver and panel built and verified, receivers on fourteen real tracks, the twelve kits migrated; V5.1 (fx banks through the Kit FX Receiver, fx volumes per kit) built, to be placed and verified; then the switch. Phase 1 complete |
 | Devices | seven, imported as installed on 2026-09-08; scripts embedded and identical to the sources beside them |
 | Tools | `amxd.py`, `analyse.py` (from the August `amxd-tools`), `embed.py`, `unembed.py`, `check_embedded.py`, `install.py`, `fix_als_path.py` |
 | Open | the three Live checks of PLAN §3, before V5 is built |
@@ -27,6 +27,10 @@ HANDOFF, the design in PLAN.
 
 ## Log
 
+- **2026-09-10** — V5.1: Alberton Kit FX Receiver built (audio effect, governs the nearest
+  rack, seven tests); the panel broadcasts fx banks and fx volumes instead of finding racks by
+  name, and gains a volume dial per bank; PROTOCOL.md part A describes V5. The migration adds
+  the resample bank at [64, 0…] and the fx volumes from V4.3's policy.
 - **2026-09-10** — The twelve V4.3 kits migrated into the V5 panel through the set file
   (`bb18efd`, `tools/migrate_kits.py`), original kept as `.pre-migrate-20260910-134708`.
   Verified on reopening: "Tabú" recalled on V5 drives the real tracks as V4.3's kit 3 did.

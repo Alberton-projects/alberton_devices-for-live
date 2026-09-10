@@ -74,18 +74,22 @@ test('a receiver introducing itself names the strip', () => {
   assert.equal(labels.lab99, undefined);
 });
 
-test('fx banks are captured from and recalled into the [FX] racks found by name', () => {
+test('fx banks are broadcast to the receivers, captured through them, and re-sent on recall', () => {
   const d = boot();
-  d.send('capture_fx');
-  const out = d.take(2);
-  const banks = Object.fromEntries(out.filter(o => /_fx$/.test(o[0])).map(o => [o[0], o.slice(1)]));
-  assert.deepEqual(banks.drums_fx, [64, 127, 14, 0, 0, 0, 0, 0, 0]);
-  assert.deepEqual(banks.vocals_fx, [9, 8, 7, 6, 5, 4, 3, 2, 1]);
-  assert.deepEqual(banks.pads_fx, [0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  assert.deepEqual(out[out.length - 1], ['fx_captured']);
   sendMsg(d, 'drums_fx', 1, 2, 3, 4, 5, 6, 7, 8, 9);
-  const rack = d.live.live_set.children.tracks[0].children.devices[0];
-  assert.equal(rack.children.parameters[1].value, 1); assert.equal(rack.children.parameters[9].value, 9);
+  assert.deepEqual(d.take(0), [['fx', 1, 1, 2, 3, 4, 5, 6, 7, 8, 9]]);
+  sendMsg(d, 'fxvol_vocals', 0.6);
+  assert.deepEqual(d.take(0), [['fxvol', 8, 0.6]]);
+  assert.equal(d.liveLog.length, 0, 'the panel writes nothing to Live for fx');
+  d.send('capture_fx');
+  assert.deepEqual(d.take(0), [['capture']]);
+  d.send('fxret', 9, 64, 0, 0, 0, 0, 0, 0, 0, 0);
+  assert.deepEqual(d.take(2), [['resample_fx', 64, 0, 0, 0, 0, 0, 0, 0, 0]]);
+  d.send('recalled', 2); d.Task.advance(50);
+  const out = d.take(0);
+  assert.ok(out.some(o => o[0] === 'fx' && o[1] === 1 && o[2] === 1 && o[10] === 9), 'the drums bank goes out again');
+  assert.ok(out.some(o => o[0] === 'fx' && o[1] === 9 && o[2] === 64), 'and the captured resample bank');
+  assert.ok(out.some(o => o[0] === 'fxvol' && o[1] === 8 && o[2] === 0.6));
 });
 
 test('an unknown message is reported, not fatal', () => {
@@ -95,8 +99,9 @@ test('an unknown message is reported, not fatal', () => {
 });
 
 test('at compile time the dials, the main and the bus are read from the patcher', () => {
-  const d = boot({ controls: { p1: 12, v1: 0.4, vmain: 0.9, bus: 3 }, keepSync: true });
+  const d = boot({ controls: { p1: 12, v1: 0.4, vmain: 0.9, bus: 3, pattr_drums: [9, 8, 7, 6, 5, 4, 3, 2, 1], fxvol_drums: 0.3 }, keepSync: true });
   d.Task.advance(0);
   assert.equal(d.ctx.prog[1], 12); assert.equal(d.ctx.vol[1], 0.4); assert.equal(d.ctx.mainVol, 0.9); assert.equal(d.ctx.busNumber, 3);
+  assert.deepEqual(d.ctx.fxValues[1], [9, 8, 7, 6, 5, 4, 3, 2, 1]); assert.equal(d.ctx.fxVol[1], 0.3);
   assert.deepEqual(d.take(0), [['set', 'ks3']]);
 });

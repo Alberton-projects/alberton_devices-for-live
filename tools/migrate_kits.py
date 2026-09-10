@@ -15,6 +15,8 @@ to write; the original set is kept beside it as <set>.als.pre-migrate-<stamp>.
     the master                  ->   vmain 0.85
     presetname[1]               ->   presetname
     pattr @bindto <bank>_fx     ->   pattr_<bank>       (found by reading V4.3's patcher)
+    resample bank, never stored ->   pattr_resample     [64, 0 ...]
+    volume policy per fx track  ->   fxvol_<bank>       (groups 0.70; vocals 0.625; resample 0.85)
 
 V4.3 never stored its resample bank (its pattr binds to an object that does not exist), so
 migrated kits carry no resample values: capture them again in V5 where they matter.
@@ -38,6 +40,9 @@ STRIPS = ["kick", "snare", "hihat", "cymbals", "bass_electric", "bass_synth", "p
 VOLUMES = {n: 0.70 for n in range(1, 15)}
 VOLUMES.update({5: 0.85, 14: 0.36, 15: 0.85, 16: 0.85})   # V4.3's resetVolumes policy, by strip
 BANKS = ["drums", "bass", "pads", "pianos", "leads", "loops", "vocoder", "vocals", "resample"]
+RESAMPLE_DEFAULT = [64.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]   # V4.3 never stored it; the owner wants macro 1 at 64
+FX_VOLUMES = {"drums": 0.70, "bass": 0.70, "pads": 0.70, "pianos": 0.70, "leads": 0.70, "loops": 0.70,
+              "vocoder": 0.70, "vocals": 0.625, "resample": 0.85}   # V4.3's volume policy for those tracks
 
 
 def bank_clients():
@@ -93,6 +98,10 @@ def translate(v43, clients):
         for varname, bank in clients.items():
             if varname in d and len(d[varname]) == 9:
                 nd["pattr_" + bank] = [float(v) for v in d[varname]]
+        if "pattr_resample" not in nd:
+            nd["pattr_resample"] = list(RESAMPLE_DEFAULT)
+        for bank, v in FX_VOLUMES.items():
+            nd["fxvol_" + bank] = [v]
         out[sid] = {"id": int(sid), "data": nd}
     return out
 

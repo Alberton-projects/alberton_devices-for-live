@@ -13,9 +13,10 @@
       who                     every receiver answers "bound <strip> <track name>" on ks<bus>_ret,
                               and the panel writes the name under the strip
 
-    V5.0 keeps one thing from V4.3 by name: the nine FX macro banks, captured from and
-    recalled into the [FX] rack of each group track found by its name. V5.1 moves that to
-    receivers too; the block is marked below.
+    The nine fx banks -- nine macros each -- go the same way: "fx <bank> <v1..v9>" to the Kit
+    FX Receiver sitting by the rack, "fxvol <bank> <0..1>" for that track's volume, and
+    "capture" to ask every fx receiver for its rack's macros, answered as "fxret <bank>
+    <v1..v9>" on the reply channel. The panel touches Live for one thing only: Main.
 
     Every Live API access is guarded; post() is silent unless "debug 1" is sent.
 */
@@ -28,6 +29,7 @@ outlets = 3;
 // 2: the FX banks -- "<key>_fx v1..v9" for the multisliders, and "fx_captured"
 
 var STRIPS = 16;
+var BANKS = ["drums", "bass", "pads", "pianos", "leads", "loops", "vocoder", "vocals", "resample"];
 
 // ============ LOGGING ============
 
@@ -68,7 +70,15 @@ var busNumber = 1;
 var prog = [];     // 1..16
 var vol = [];      // 1..16
 var mainVol = 0.85;
+var fxValues = [];   // 1..9, nine macros each
+var fxVol = [];      // 1..9
 for (var i = 0; i <= STRIPS; i++) { prog[i] = 0; vol[i] = 0.85; }
+for (var b = 0; b <= BANKS.length; b++) { fxValues[b] = [0, 0, 0, 0, 0, 0, 0, 0, 0]; fxVol[b] = 0.85; }
+
+function bankIndex(key) {
+    for (var b = 0; b < BANKS.length; b++) if (BANKS[b] === key) return b + 1;
+    return 0;
+}
 
 // ============ THE PROGRAM QUEUE ============
 
@@ -113,8 +123,12 @@ function anything() {
     } else if (m.charAt(0) === "v" && (n = parseInt(m.substring(1), 10)) >= 1 && n <= STRIPS) {
         vol[n] = a[0];
         outlet(0, "vol", n, vol[n]);
-    } else if (m.length > 3 && m.substring(m.length - 3) === "_fx") {
-        applyFX(m.substring(0, m.length - 3), a);
+    } else if (m.length > 3 && m.substring(m.length - 3) === "_fx" && (n = bankIndex(m.substring(0, m.length - 3))) > 0) {
+        fxValues[n] = a.slice(0, 9);
+        outlet(0, ["fx", n].concat(fxValues[n]));
+    } else if (m.indexOf("fxvol_") === 0 && (n = bankIndex(m.substring(6))) > 0) {
+        fxVol[n] = a[0];
+        outlet(0, "fxvol", n, fxVol[n]);
     } else {
         warn("unknown message " + m);
     }
@@ -133,6 +147,10 @@ function sendall() {
     for (var n = 1; n <= STRIPS; n++) {
         outlet(0, "vol", n, vol[n]);
         queueProg(n, prog[n]);
+    }
+    for (var b = 1; b <= BANKS.length; b++) {
+        outlet(0, "fxvol", b, fxVol[b]);
+        outlet(0, ["fx", b].concat(fxValues[b]));
     }
     vmain(mainVol);
 }
@@ -171,7 +189,6 @@ function init() {
 }
 
 function refresh() {
-    fxCache = {};
     who();
 }
 
@@ -192,100 +209,26 @@ function bound() {
     log("strip " + strip + " is '" + name + "'");
 }
 
-// ============ FX BANKS (V5.0: still by group name -- the one set-specific block) ============
-// A bank is nine macros of the first device named [FX] on the track. The tracks are found
-// by name: group tracks whose name contains the word, or a track named exactly so.
-
-var FX_TARGETS = {
-    "drums":    { search: "DRUMS",    isGroup: true },
-    "bass":     { search: "BASS",     isGroup: true },
-    "pads":     { search: "PADS",     isGroup: true },
-    "pianos":   { search: "PIANOS",   isGroup: true },
-    "leads":    { search: "LEADS",    isGroup: true },
-    "loops":    { search: "LOOPS",    isGroup: true },
-    "vocoder":  { search: "Vocoder",  isGroup: false },
-    "vocals":   { search: "Vocals",   isGroup: false },
-    "resample": { search: "Resample", isGroup: false }
-};
-var FX_ORDER = ["drums", "bass", "pads", "pianos", "leads", "loops", "vocoder", "vocals", "resample"];
-var fxCache = {};   // key -> device path
-
-function scanFX() {
-    fxCache = {};
-    guarded("fx scan", function () {
-        var api = new LiveAPI("live_set");
-        if (!exists(api)) return;
-        var count = api.getcount("tracks");
-        for (var i = 0; i < count; i++) {
-            var trackPath = "live_set tracks " + i;
-            var track = new LiveAPI(trackPath);
-            var name = String(track.get("name")).toUpperCase();
-            var isGroup = track.get("is_foldable") == 1;
-            for (var key in FX_TARGETS) {
-                var t = FX_TARGETS[key];
-                var matches = t.isGroup ? (name.indexOf(t.search.toUpperCase()) >= 0 && isGroup) : (name === t.search.toUpperCase());
-                if (matches && !fxCache[key]) {
-                    var devicePath = fxDeviceOn(trackPath);
-                    if (devicePath) fxCache[key] = devicePath;
-                }
-            }
-        }
-    });
-    log("fx banks: " + FX_ORDER.filter(function (k) { return !!fxCache[k]; }).join(" "));
+// boundfx <bank> <track name...>: an fx receiver introducing itself
+function boundfx() {
+    var a = arrayfromargs(arguments);
+    log("fx bank " + a[0] + " is on '" + a.slice(1).join(" ") + "'");
 }
 
-function fxDeviceOn(trackPath) {
-    var track = new LiveAPI(trackPath);
-    var n = track.getcount("devices");
-    for (var d = 0; d < n; d++) {
-        var device = new LiveAPI(trackPath + " devices " + d);
-        if (exists(device) && String(device.get("name")).indexOf("[FX]") >= 0) return device.unquotedpath;
-    }
-    return null;
-}
+// ============ FX BANKS ============
 
-function ensureFX() {
-    var any = false;
-    for (var k in fxCache) any = true;
-    if (!any) scanFX();
-}
-
+// The FX Capture button: every fx receiver answers with its rack's macros
 function capture_fx() {
-    ensureFX();
-    for (var i = 0; i < FX_ORDER.length; i++) {
-        var key = FX_ORDER[i];
-        if (!fxCache[key]) {
-            outlet(2, key + "_fx", 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            continue;
-        }
-        var values = guarded("capture of " + key, function () {
-            var out = [];
-            for (var m = 1; m <= 9; m++) out.push(Math.round(new LiveAPI(fxCache[key] + " parameters " + m).get("value")));
-            return out;
-        });
-        if (values) outlet(2, [key + "_fx"].concat(values));
-    }
-    outlet(2, "fx_captured");
+    outlet(0, "capture");
 }
 
-function applyFX(key, values) {
-    if (!FX_TARGETS[key]) {
-        warn("unknown fx bank " + key);
-        return;
-    }
-    ensureFX();
-    if (!fxCache[key]) return;
-    guarded("recall of " + key + " fx", function () {
-        for (var i = 0; i < 9 && i < values.length; i++) {
-            var api = new LiveAPI(fxCache[key] + " parameters " + (i + 1));
-            if (!exists(api)) {
-                warn("the [FX] rack of " + key + " is gone (send refresh)");
-                return;
-            }
-            if (api.get("is_enabled") == 0) continue;   // a hidden macro is disabled: skip it quietly
-            api.set("value", values[i]);
-        }
-    });
+// fxret <bank> <v1..v9>: an fx receiver's answer, into the bank's slider
+function fxret() {
+    var a = arrayfromargs(arguments);
+    var b = Math.round(a[0]);
+    if (!(b >= 1 && b <= BANKS.length)) return;
+    fxValues[b] = a.slice(1, 10);
+    outlet(2, [BANKS[b - 1] + "_fx"].concat(fxValues[b]));
 }
 
 // After a recompile (autowatch, while developing) every var above is back at its initial
@@ -301,6 +244,11 @@ function syncFromPatcher() {
         var vm = patcher.getnamed("vmain"), b = patcher.getnamed("bus");
         if (vm) mainVol = vm.getvalueof();
         if (b) busNumber = Math.round(b.getvalueof());
+        for (var k = 1; k <= BANKS.length; k++) {
+            var pt = patcher.getnamed("pattr_" + BANKS[k - 1]), fv = patcher.getnamed("fxvol_" + BANKS[k - 1]);
+            if (pt) { var v = pt.getvalueof(); if (v instanceof Array && v.length >= 9) fxValues[k] = v.slice(0, 9); }
+            if (fv) fxVol[k] = fv.getvalueof();
+        }
         setChannels();
     } catch (e) {
         warn("could not read the patcher's controls: " + e);

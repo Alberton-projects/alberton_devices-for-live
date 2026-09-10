@@ -157,7 +157,7 @@ repository created from the working folder with its history, first push.
   Chain Selector / Macro 1–16, `Apply volume` toggle. Program changes go to the instrument through
   `midiformat` as today; Chain Selector and Macro write to the first rack on the receiver's own
   track over the LOM (`this_device canonical_parent`), so the drum tracks stop needing their names.
-- **Kit FX Receiver** (audio effect, V5.1): sits *inside* the rack it controls, first in the chain,
+- **Kit FX Receiver** — **built 2026-09-10** (audio effect, V5.1): governs the nearest rack — the one it sits inside, else the first after it on the track, else the last before it —
   so placement is the binding and no rack name is needed. `Bus`, `FX strip`; applies macros 1–8 of
   its parent rack; answers `capture` with the current values; optional `Apply volume` for the
   track. Group tracks cannot host MIDI effects, which is why this is a separate audio device.
