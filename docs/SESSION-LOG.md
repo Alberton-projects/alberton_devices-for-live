@@ -39,6 +39,9 @@ directory, `_handoff-devices/tools-2026-09-10/`, because they carry the set's na
 
 ## Log
 
+- **2026-09-29** — Rules made mechanical: `tools/check_rules.py` (+ tests), CI
+  (`.github/workflows/checks.yml`: tests, check_embedded, sync_shared, rules) and a cloud
+  SessionStart hook that states Live is not reachable. No device changed.
 - **2026-09-10** — Published. V4.3, its script, the old PC Receiver, their test and the
   migration tool left the tree (history up to `d2e8f34`); PROTOCOL part B moved to
   `docs/history/`; a README per device, `docs/INSTALL.md`, `README.md` and `README.ca.md`

@@ -5,3 +5,5 @@ node_modules/
 .DS_Store
 # scratch builds of tools (never the devices themselves)
 build/
+# Claude Code (personal overrides)
+.claude/settings.local.json

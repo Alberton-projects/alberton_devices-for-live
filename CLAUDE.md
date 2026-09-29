@@ -81,3 +81,10 @@ new script-held state must be covered there too. Caches rebuild themselves on fi
 Release form: `tools/embed.py --write`, then `tools/check_embedded.py`, then
 `tools/install.py --release`. **Before a show, every device is installed in release form.** Verify against the real set, not only by reading: write a
 parameter, read it back over MCP, compare.
+
+## Checks the rules are held to
+
+`python3 tools/check_rules.py` checks the hard rules that a machine can check: no word of the
+private project's vocabulary (kept as hashes), English only in code, no set names in `devices/`. CI runs it
+with the tests on every pull request. `.claude/hooks/session-start.sh` tells a cloud session
+that Live is not reachable there, so that nothing needing Live is reported as verified.
